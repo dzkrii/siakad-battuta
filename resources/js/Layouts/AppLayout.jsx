@@ -13,7 +13,6 @@ export default function AppLayout({ title, children }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { url } = usePage();
     const auth = usePage().props.auth.user;
-    console.log(auth);
 
     const flash = flashMessage(usePage());
 
