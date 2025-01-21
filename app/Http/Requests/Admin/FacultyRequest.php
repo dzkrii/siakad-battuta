@@ -24,13 +24,29 @@ class FacultyRequest extends FormRequest
     {
         return [
             'name' => [
-                'required' . 'string' . 'min:3' . 'max:255'
+                'required',
+                'string',
+                'min:3',
+                'max:255',
             ],
             'logo' => Rule::when($this->routeIs('admin.faculties.store'), [
                 'required',
-                'mimes:png,jpg, jpeg, webp',
+                'mimes:png,jpg,jpeg,webp',
                 'max:2048',
             ]),
+            Rule::when($this->routeIs('admin.faculties.update'), [
+                'nullable',
+                'mimes:png,jpg,jpeg,webp',
+                'max:2048',
+            ]),
+        ];
+    }
+
+    public function attributes(): array
+    {
+        return [
+            'name' => 'Nama',
+            'logo' => 'Logo',
         ];
     }
 }
