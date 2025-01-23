@@ -54,18 +54,9 @@ class Department extends Model
 
     public function scopeSorting(Builder $query, array $sorts): void
     {
-        // $query->when($sorts['field'] ?? null && $sorts['direction'] ?? null, function ($query) use ($sorts) {
-        //     match ($sorts['field']) {
-        //         'faculty_id' => $query->join('faculties', 'departments.faculty_id', '=', 'faculties.id')
-        //             ->orderBy('faculties.name', $sorts['direction']),
-        //         default => $query->orderBy($sorts['field'], $sorts['direction']),
-        //     };
-        // });
-
         $query->when($sorts['field'] ?? null && $sorts['direction'] ?? null, function ($query) use ($sorts) {
             match ($sorts['field']) {
                 'faculty_id' => $query->join('faculties', 'departments.faculty_id', '=', 'faculties.id')
-                    ->select('departments.*') // Menghindari ambiguitas dengan memilih kolom dari tabel utama
                     ->orderBy('faculties.name', $sorts['direction']),
                 default => $query->orderBy($sorts['field'], $sorts['direction']),
             };

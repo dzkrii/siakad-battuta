@@ -18,7 +18,7 @@ class DepartmentController extends Controller
     public function index(): Response
     {
         $departments = Department::query()
-            ->select(['id', 'faculty_id', 'name', 'code', 'slug', 'created_at'])
+            ->select(['departments.id', 'departments.faculty_id', 'departments.name', 'departments.code', 'departments.slug', 'departments.created_at'])
             ->filter(request()->only(['search']))
             ->sorting(request()->only(['field', 'direction']))
             ->with('faculty')

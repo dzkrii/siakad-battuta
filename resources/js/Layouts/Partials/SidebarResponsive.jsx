@@ -23,7 +23,7 @@ export default function SidebarResponsive({ auth, url }) {
                 {auth.roles.some((role) => ['Admin'].includes(role)) && (
                     <>
                         <NavLink
-                            url="#"
+                            url={route('admin.dashboard')}
                             active={url.startsWith('/admin/dashboard')}
                             title="Dashboard"
                             icon={IconLayout2}
@@ -48,33 +48,48 @@ export default function SidebarResponsive({ auth, url }) {
                             title="Tahun Ajaran"
                             icon={IconCalendarTime}
                         />
-                        <NavLink url="#" active={url.startsWith('/admin/classrooms')} title="Kelas" icon={IconDoor} />
-                        <NavLink url="#" active={url.startsWith('/admin/roles')} title="Peran" icon={IconCircleKey} />
+                        <NavLink
+                            url={route('admin.classrooms.index')}
+                            active={url.startsWith('/admin/classrooms')}
+                            title="Kelas"
+                            icon={IconDoor}
+                        />
+                        <NavLink
+                            url={route('admin.roles.index')}
+                            active={url.startsWith('/admin/roles')}
+                            title="Peran"
+                            icon={IconCircleKey}
+                        />
 
                         <div className="px-3 py-2 text-xs font-medium text-white">Pengguna</div>
                         <NavLink
-                            url="#"
+                            url={route('admin.students.index')}
                             active={url.startsWith('/admin/students')}
                             title="Mahasiswa"
                             icon={IconUsers}
                         />
                         <NavLink
-                            url="#"
+                            url={route('admin.teachers.index')}
                             active={url.startsWith('/admin/teachers')}
                             title="Dosen"
                             icon={IconUsersGroup}
                         />
-                        <NavLink url="#" active={url.startsWith('/admin/operators')} title="Operator" icon={IconUser} />
+                        <NavLink
+                            url={route('admin.operators.index')}
+                            active={url.startsWith('/admin/operators')}
+                            title="Operator"
+                            icon={IconUser}
+                        />
 
                         <div className="px-3 py-2 text-xs font-medium text-white">Akademik</div>
                         <NavLink
-                            url="#"
+                            url={route('admin.courses.index')}
                             active={url.startsWith('/admin/courses')}
                             title="Mata Kuliah"
                             icon={IconBooks}
                         />
                         <NavLink
-                            url="#"
+                            url={route('admin.schedules.index')}
                             active={url.startsWith('/admin/schedules')}
                             title="Jadwal"
                             icon={IconCalendar}
@@ -82,13 +97,13 @@ export default function SidebarResponsive({ auth, url }) {
 
                         <div className="px-3 py-2 text-xs font-medium text-white">Pembayaran</div>
                         <NavLink
-                            url="#"
+                            url={route('admin.fees.index')}
                             active={url.startsWith('/admin/fees')}
                             title="Uang Kuliah Tunggal"
                             icon={IconMoneybag}
                         />
                         <NavLink
-                            url="#"
+                            url={route('admin.fee-groups.index')}
                             active={url.startsWith('/admin/fee-groups')}
                             title="Golongan UKT"
                             icon={IconDroplets}
@@ -123,39 +138,39 @@ export default function SidebarResponsive({ auth, url }) {
                 {auth.roles.some((role) => ['Operator'].includes(role)) && (
                     <>
                         <NavLink
-                            url="#"
+                            url={route('operators.dashboard')}
                             active={url.startsWith('/operators/dashboard')}
                             title="Dashboard"
                             icon={IconLayout2}
                         />
                         <div className="px-3 py-2 text-xs font-medium text-white">Pengguna</div>
                         <NavLink
-                            url="#"
+                            url={route('operators.students.index')}
                             active={url.startsWith('/operators/students')}
                             title="Mahasiswa"
                             icon={IconUsers}
                         />
                         <NavLink
-                            url="#"
+                            url={route('operators.teachers.index')}
                             active={url.startsWith('/operators/teachers')}
                             title="Dosen"
                             icon={IconUsersGroup}
                         />
                         <div className="px-3 py-2 text-xs font-medium text-white">Akademik</div>
                         <NavLink
-                            url="#"
+                            url={route('operators.classrooms.index')}
                             active={url.startsWith('/operators/classrooms')}
                             title="Kelas"
                             icon={IconDoor}
                         />
                         <NavLink
-                            url="#"
+                            url={route('operators.courses.index')}
                             active={url.startsWith('/operators/courses')}
                             title="Mata Kuliah"
                             icon={IconBooks}
                         />
                         <NavLink
-                            url="#"
+                            url={route('operators.schedules.index')}
                             active={url.startsWith('/operators/schedules')}
                             title="Jadwal"
                             icon={IconCalendar}
