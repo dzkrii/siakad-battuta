@@ -60,7 +60,6 @@ export default function Create(props) {
                 <CardContent className="p-6">
                     <form onSubmit={onHandleSubmit}>
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
-                            
                             <div className="col-span-2">
                                 <Label htmlFor="course_id">Mata Kuliah</Label>
                                 <Select

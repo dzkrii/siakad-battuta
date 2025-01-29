@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Operator;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CourseOperatorRequest extends FormRequest
 {
@@ -26,10 +27,11 @@ class CourseOperatorRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
+                Rule::unique('courses')->ignore($this->course?->code),
             ],
             'teacher_id' => [
                 'required',
-                'exists:users,id',
+                'exists:teachers,id',
             ],
             'name' => [
                 'required',

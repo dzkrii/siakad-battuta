@@ -13,7 +13,17 @@ import UseFilter from '@/hooks/UseFilter.';
 import AppLayout from '@/Layouts/AppLayout';
 import { deleteAction, formatDateIndo } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { IconArrowsDownUp, IconPencil, IconPlus, IconRefresh, IconTrash, IconUsers } from '@tabler/icons-react';
+import {
+    IconArrowsDownUp,
+    IconBuilding,
+    IconMoneybag,
+    IconPencil,
+    IconPlus,
+    IconRefresh,
+    IconSchool,
+    IconTrash,
+    IconUsers,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 
 export default function Index(props) {
@@ -210,6 +220,21 @@ export default function Index(props) {
                                         <TableCell>{formatDateIndo(student.created_at)}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-x-1">
+                                                <Button variant="purple" size="sm" asChild>
+                                                    <Link href={route('operators.study-plans.index', [student])}>
+                                                        <IconBuilding className="size-4" />
+                                                    </Link>
+                                                </Button>
+                                                <Button variant="green" size="sm" asChild>
+                                                    <Link href={route('operators.fees.index', [student])}>
+                                                        <IconMoneybag className="size-4" />
+                                                    </Link>
+                                                </Button>
+                                                <Button variant="yellow" size="sm" asChild>
+                                                    <Link href={route('operators.study-results.index', [student])}>
+                                                        <IconSchool className="size-4" />
+                                                    </Link>
+                                                </Button>
                                                 <Button variant="blue" size="sm" asChild>
                                                     <Link href={route('operators.students.edit', [student])}>
                                                         <IconPencil className="size-4" />

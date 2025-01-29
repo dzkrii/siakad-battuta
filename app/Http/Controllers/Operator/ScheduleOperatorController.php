@@ -88,7 +88,7 @@ class ScheduleOperatorController extends Controller
         try {
             Schedule::create([
                 'faculty_id' => auth()->user()->operator->faculty_id,
-                'department_id' => auth()->user()->operator->faculty_id,
+                'department_id' => auth()->user()->operator->department_id,
                 'course_id' => $request->course_id,
                 'classroom_id' => $request->classroom_id,
                 'academic_year_id' => activeAcademicYear()->id,

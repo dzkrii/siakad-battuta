@@ -54,7 +54,7 @@ class Schedule extends Model
         return $this->belongsTo(AcademicYear::class);
     }
 
-    public function studyPlan(): BelongsToMany
+    public function studyPlans(): BelongsToMany
     {
         return $this->belongsToMany(StudyPlan::class, 'study_plan_schedule')->withTimestamps();
     }

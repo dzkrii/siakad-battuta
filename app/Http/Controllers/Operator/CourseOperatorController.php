@@ -22,7 +22,7 @@ class CourseOperatorController extends Controller
             ->filter(request()->only(['search']))
             ->sorting(request()->only(['field', 'direction']))
             ->where('courses.faculty_id', auth()->user()->operator->faculty_id)
-            ->where('courses.department_id', auth()->user()->operator->faculty_id)
+            ->where('courses.department_id', auth()->user()->operator->department_id)
             ->with(['teacher', 'academicYear'])
             ->paginate(request()->load ?? 10);
 

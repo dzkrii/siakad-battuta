@@ -90,7 +90,7 @@ export default function Index(props) {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>#</TableHead>
-                                   
+
                                     <TableHead>
                                         <Button
                                             variant="ghost"

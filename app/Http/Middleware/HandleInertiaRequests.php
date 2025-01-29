@@ -54,6 +54,7 @@ class HandleInertiaRequests extends Middleware
                 ->where('academic_year_id', activeAcademicYear()->id)
                 ->where('semester', auth()->user()->student->semester)
                 ->where('status', FeeStatus::SUCCESS->value)
+                ->first()
                 : null
         ];
     }
