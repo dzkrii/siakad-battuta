@@ -93,7 +93,7 @@ class StudentOperatorController extends Controller
 
             $user = User::create([
                 'name' => $request->name,
-                'email' => $request->email,
+                'email' => $request->student_number . '@battuta.ac.id',
                 'password' => Hash::make($request->password),
                 'avatar' => $this->upload_file($request, 'avatar', 'users'),
             ]);
@@ -168,7 +168,7 @@ class StudentOperatorController extends Controller
 
             $student->user()->update([
                 'name' => $request->name,
-                'email' => $request->email,
+                'email' => $request->student_number . '@battuta.ac.id',
                 'password' => $request->password ? Hash::make($request->password) : $student->user->password,
                 'avatar' => $this->update_file($request, $student->user, 'avatar', 'users'),
             ]);

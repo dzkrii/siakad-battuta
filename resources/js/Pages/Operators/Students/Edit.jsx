@@ -78,7 +78,7 @@ export default function Edit(props) {
                                 />
                                 {errors.name && <InputError message={errors.name} />}
                             </div>
-                            <div className="col-span-2">
+                            {/* <div className="col-span-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
                                     type="email"
@@ -89,7 +89,7 @@ export default function Edit(props) {
                                     placeholder="Masukkan alamat email"
                                 />
                                 {errors.email && <InputError message={errors.email} />}
-                            </div>
+                            </div> */}
                             <div className="col-span-2">
                                 <Label htmlFor="password">Password</Label>
                                 <Input

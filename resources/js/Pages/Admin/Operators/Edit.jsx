@@ -72,7 +72,7 @@ export default function Edit(props) {
                                     id="name"
                                     value={data.name}
                                     onChange={onHandleChange}
-                                    placeholder="Masukkan nama mahasiswa"
+                                    placeholder="Masukkan nama operator"
                                 />
                                 {errors.name && <InputError message={errors.name} />}
                             </div>

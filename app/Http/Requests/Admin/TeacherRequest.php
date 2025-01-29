@@ -37,8 +37,8 @@ class TeacherRequest extends FormRequest
             ]),
             'faculty_id' => ['required', 'exists:faculties,id'],
             'department_id' => ['required', 'exists:departments,id'],
-            'teacher_number' => ['required', 'min:3', 'max:255', 'string'],
-            'academic_title' => ['required', 'min:3', 'max:255', 'string'],
+            'teacher_number' => ['nullable', 'max:255', 'string', Rule::unique('teachers')->ignore($this->teacher),],
+            'academic_title' => ['nullable', 'max:255', 'string'],
             'avatar' => ['nullable', 'mimes:png,jpg,jpeg,webp'],
         ];
     }

@@ -57,7 +57,7 @@ export default function Index(props) {
                                 <ComboBox
                                     items={props.students}
                                     selectedItem={data.student}
-                                    placeholder="Pilih mahasiswa..."
+                                    placeholder="Pilih mahasiswa"
                                     onSelect={(currentValue) => setData('student', currentValue)}
                                 />
                                 {errors.student && <InputError message={errors.student} />}

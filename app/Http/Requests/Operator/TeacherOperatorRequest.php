@@ -46,12 +46,10 @@ class TeacherOperatorRequest extends FormRequest
             ]),
             'teacher_number' => [
                 'required',
-                'min:3',
-                'max:255',
+                Rule::unique('teachers')->ignore($this->teacher),
             ],
             'academic_title' => [
-                'required',
-                'min:3',
+                'nullable',
                 'max:255',
             ],
             'avatar' => ['nullable', 'mimes:png,jpg,jpeg,webp', 'max:2048'],

@@ -13,6 +13,26 @@ class FacultySeeder extends Seeder
      */
     public function run(): void
     {
-        Faculty::factory()->count(3)->create();
+        $faculty = [
+            [
+                'name' => 'Fakultas Teknologi',
+                'code' => rand(6, 999999),
+                'slug' => str()->slug('Fakultas Teknologi'),
+                'created_at' => now(),
+            ],
+            [
+                'name' => 'Fakultas Ekonomi dan Bisnis',
+                'code' => rand(6, 999999),
+                'slug' => str()->slug('Fakultas Ekonomi dan Bisnis'),
+                'created_at' => now(),
+            ],
+            [
+                'name' => 'Fakultas Hukum dan Pendidikan',
+                'code' => rand(6, 999999),
+                'slug' => str()->slug('Fakultas Hukum dan Pendidikan'),
+                'created_at' => now(),
+            ],
+        ];
+        Faculty::insert($faculty);
     }
 }

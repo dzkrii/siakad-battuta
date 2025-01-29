@@ -63,8 +63,8 @@ class CourseOperatorController extends Controller
                         $query->where('name', 'Teacher');
                     })->orderBy('name');
                 })
-                ->where('faculty_id', auth()->user()->operator->faculty_id)
-                ->where('department_id', auth()->user()->operator->department_id)
+                // ->where('faculty_id', auth()->user()->operator->faculty_id)
+                // ->where('department_id', auth()->user()->operator->department_id)
                 ->with(['user'])
                 ->get()
                 ->map(function ($item) {

@@ -28,12 +28,11 @@ class StudentOperatorRequest extends FormRequest
                 'string',
                 'max:255',
             ],
-            'email' => [
-                'required',
-                'email',
-                'max:255',
-                Rule::unique('users')->ignore($this->student?->user),
-            ],
+            // 'email' => [
+            //     'email',
+            //     'max:255',
+            //     Rule::unique('users')->ignore($this->student?->user),
+            // ],
             'password' => Rule::when($this->routeIs('operators.students.store'), [
                 'required',
                 'min:6',

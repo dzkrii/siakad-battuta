@@ -24,7 +24,7 @@ class StudentRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'min:3', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($this->student?->user)],
+            // 'email' => ['email', 'max:255', Rule::unique('users')->ignore($this->student?->user)],
             'password' => Rule::when($this->routeIs('admin.students.store'), [
                 'required',
                 'min:6',

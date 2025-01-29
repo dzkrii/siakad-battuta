@@ -110,7 +110,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    {/* <TableHead>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -121,7 +121,7 @@ export default function Index(props) {
                                                 <IconArrowsDownUp className="size-4" />
                                             </span>
                                         </Button>
-                                    </TableHead>
+                                    </TableHead> */}
                                     <TableHead>Logo</TableHead>
                                     <TableHead>
                                         <Button
@@ -141,9 +141,10 @@ export default function Index(props) {
                             <TableBody>
                                 {faculties.map((faculty, index) => (
                                     <TableRow key={index}>
+                                        {console.log(faculty)}
                                         <TableCell>{index + 1 + (meta.current_page - 1) * meta.per_page}</TableCell>
                                         <TableCell>{faculty.name}</TableCell>
-                                        <TableCell>{faculty.code}</TableCell>
+                                        {/* <TableCell>{faculty.code}</TableCell> */}
                                         <TableCell>
                                             <Avatar>
                                                 <AvatarImage src={faculty.logo} />

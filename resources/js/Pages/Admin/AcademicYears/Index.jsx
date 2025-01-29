@@ -126,7 +126,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    <TableHead className='text-center'>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -138,7 +138,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    <TableHead className='text-center'>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -172,8 +172,8 @@ export default function Index(props) {
                                         <TableCell>{academicYear.name}</TableCell>
                                         <TableCell>{formatDateIndo(academicYear.start_date)}</TableCell>
                                         <TableCell>{formatDateIndo(academicYear.end_date)}</TableCell>
-                                        <TableCell>{academicYear.semester}</TableCell>
-                                        <TableCell>{academicYear.is_active}</TableCell>
+                                        <TableCell className='text-center'>{academicYear.semester}</TableCell>
+                                        <TableCell className='text-center'>{academicYear.is_active}</TableCell>
                                         <TableCell>{formatDateIndo(academicYear.created_at)}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-x-1">

@@ -16,7 +16,7 @@ class StudyResultStudentController extends Controller implements HasMiddleware
     {
         return [
             // new Middleware('checkActiveAcademicYear'),
-            new Middleware('checkFeeStudent'),
+            // new Middleware('checkFeeStudent'),
         ];
     }
 

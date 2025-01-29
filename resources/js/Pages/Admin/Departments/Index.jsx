@@ -114,7 +114,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    {/* <TableHead>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -125,7 +125,7 @@ export default function Index(props) {
                                                 <IconArrowsDownUp className="size-4" />
                                             </span>
                                         </Button>
-                                    </TableHead>
+                                    </TableHead> */}
                                     <TableHead>
                                         <Button
                                             variant="ghost"
@@ -147,7 +147,7 @@ export default function Index(props) {
                                         <TableCell>{index + 1 + (meta.current_page - 1) * meta.per_page}</TableCell>
                                         <TableCell>{department.faculty.name}</TableCell>
                                         <TableCell>{department.name}</TableCell>
-                                        <TableCell>{department.code}</TableCell>
+                                        {/* <TableCell>{department.code}</TableCell> */}
                                         <TableCell>{formatDateIndo(department.created_at)}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-x-1">

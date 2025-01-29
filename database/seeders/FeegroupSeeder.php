@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\FeeGroup;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class FeegroupSeeder extends Seeder
 {
@@ -13,6 +14,14 @@ class FeegroupSeeder extends Seeder
      */
     public function run(): void
     {
-        FeeGroup::factory()->count(10)->create();
+        $feeGroups = [
+            [
+                'group' => 1,
+                'amount' => 4500000,
+                'created_at' => now(),
+            ],
+        ];
+
+        DB::table('fee_groups')->insert($feeGroups);
     }
 }

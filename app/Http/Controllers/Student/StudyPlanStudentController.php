@@ -26,7 +26,7 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
     {
         return [
             new Middleware('checkActiveAcademicYear', except: ['index']),
-            new Middleware('checkFeeStudent', except: ['index']),
+            // new Middleware('checkFeeStudent', except: ['index']),
         ];
     }
 
@@ -64,6 +64,7 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
         $schedules = Schedule::query()
             ->where('faculty_id', auth()->user()->student->faculty_id)
             ->where('department_id', auth()->user()->student->department_id)
+            ->where('classroom_id', auth()->user()->student->classroom_id)
             ->where('academic_year_id', activeAcademicYear()->id)
             ->with(['course', 'classroom'])
             ->withCount(['studyPlans as taken_quota' => fn($query) => $query->where('academic_year_id', activeAcademicYear()->id)])
