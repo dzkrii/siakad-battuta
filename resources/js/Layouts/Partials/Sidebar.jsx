@@ -38,6 +38,7 @@ export default function Sidebar({ auth, url }) {
                     </Link>
                 </li>
 
+                {/* ADMIN */}
                 {auth.roles.some((role) => ['Admin'].includes(role)) && (
                     <>
                         <NavLink
@@ -129,6 +130,7 @@ export default function Sidebar({ auth, url }) {
                     </>
                 )}
 
+                {/* TEACHER */}
                 {auth.roles.some((role) => ['Teacher'].includes(role)) && (
                     <>
                         <NavLink
@@ -153,6 +155,7 @@ export default function Sidebar({ auth, url }) {
                     </>
                 )}
 
+                {/* OPERATOR */}
                 {auth.roles.some((role) => ['Operator'].includes(role)) && (
                     <>
                         <NavLink

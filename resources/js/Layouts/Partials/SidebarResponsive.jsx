@@ -20,6 +20,7 @@ export default function SidebarResponsive({ auth, url }) {
     return (
         <nav className="mt-4 flex flex-1 flex-col">
             <ul role="list" className="flex flex-1 flex-col">
+                {/* ADMIN */}
                 {auth.roles.some((role) => ['Admin'].includes(role)) && (
                     <>
                         <NavLink
@@ -111,6 +112,7 @@ export default function SidebarResponsive({ auth, url }) {
                     </>
                 )}
 
+                {/* TEACHER */}
                 {auth.roles.some((role) => ['Teacher'].includes(role)) && (
                     <>
                         <NavLink
@@ -135,6 +137,7 @@ export default function SidebarResponsive({ auth, url }) {
                     </>
                 )}
 
+                {/* OPERATOR */}
                 {auth.roles.some((role) => ['Operator'].includes(role)) && (
                     <>
                         <NavLink

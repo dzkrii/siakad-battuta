@@ -74,10 +74,16 @@ class ScheduleController extends Controller implements HasMiddleware
                 'value' => $item->id,
                 'label' => $item->name,
             ]),
-            'courses' => Course::query()->select(['id', 'name'])->orderBy('name')->get()->map(fn($item) => [
-                'value' => $item->id,
-                'label' => $item->name,
-            ]),
+            'courses' => Course::query()
+                ->with(['teacher']) // Memuat relasi teacher
+                ->select(['id', 'name', 'teacher_id'])
+                ->orderBy('name')
+                ->get()
+                ->map(fn($item) => [
+                    'value' => $item->id,
+                    'label' => $item->name,
+                    'teacher' => $item->teacher?->user?->name, // Menambahkan nama dosen
+                ]),
             'classrooms' => Classroom::query()->select(['id', 'name'])->orderBy('name')->get()->map(fn($item) => [
                 'value' => $item->id,
                 'label' => $item->name,
@@ -127,10 +133,16 @@ class ScheduleController extends Controller implements HasMiddleware
                 'value' => $item->id,
                 'label' => $item->name,
             ]),
-            'courses' => Course::query()->select(['id', 'name'])->orderBy('name')->get()->map(fn($item) => [
-                'value' => $item->id,
-                'label' => $item->name,
-            ]),
+            'courses' => Course::query()
+                ->with(['teacher']) // Memuat relasi teacher
+                ->select(['id', 'name', 'teacher_id'])
+                ->orderBy('name')
+                ->get()
+                ->map(fn($item) => [
+                    'value' => $item->id,
+                    'label' => $item->name,
+                    'teacher' => $item->teacher?->user?->name, // Menambahkan nama dosen
+                ]),
             'classrooms' => Classroom::query()->select(['id', 'name'])->orderBy('name')->get()->map(fn($item) => [
                 'value' => $item->id,
                 'label' => $item->name,

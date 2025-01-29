@@ -13,7 +13,7 @@ class StudyPlanApproveOperatorRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->check() && auth()->user()->hasRole('Operator');
+        return auth()->check() && (auth()->user()->hasRole('Operator') || auth()->user()->hasRole('Admin'));
     }
 
     /**

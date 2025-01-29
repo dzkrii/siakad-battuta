@@ -138,6 +138,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
+                                    <TableHead>Dosen</TableHead>
                                     <TableHead>
                                         <Button
                                             variant="ghost"
@@ -221,6 +222,7 @@ export default function Index(props) {
                                         <TableCell>{schedule.department.name}</TableCell>
                                         <TableCell>{schedule.course.name}</TableCell>
                                         <TableCell>{schedule.classroom.name}</TableCell>
+                                        <TableCell>{schedule.course.teacher}</TableCell>
                                         <TableCell>{schedule.academicYear.name}</TableCell>
                                         <TableCell>{schedule.start_time}</TableCell>
                                         <TableCell>{schedule.end_time}</TableCell>

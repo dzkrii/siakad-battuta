@@ -70,11 +70,11 @@ export default function HeaderStudentLayout({ auth, url }) {
                                                     active={url.startsWith('/students/study-results')}
                                                     title="Kartu Hasil Studi"
                                                 />
-                                                <NavigationMenu
+                                                {/* <NavigationMenu
                                                     url={route('students.fees.index')}
                                                     active={url.startsWith('/students/fees')}
                                                     title="Pembayaran"
-                                                />
+                                                /> */}
                                             </div>
                                         </div>
 
@@ -189,7 +189,7 @@ export default function HeaderStudentLayout({ auth, url }) {
                                 >
                                     Kartu Hasil Studi
                                 </Disclosure.Button>
-                                <Disclosure.Button
+                                {/* <Disclosure.Button
                                     as="a"
                                     href={route('students.fees.index')}
                                     className={cn(
@@ -200,7 +200,7 @@ export default function HeaderStudentLayout({ auth, url }) {
                                     )}
                                 >
                                     Pembayaran
-                                </Disclosure.Button>
+                                </Disclosure.Button> */}
                             </div>
                             <div className="pb-3 pt-4">
                                 <div className="flex items-center px-5">

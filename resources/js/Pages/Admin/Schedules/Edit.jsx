@@ -122,7 +122,7 @@ export default function Edit(props) {
                                     <SelectContent>
                                         {props.courses.map((course, index) => (
                                             <SelectItem key={index} value={course.value}>
-                                                {course.label}
+                                                {course.label}  - {course.teacher}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>
