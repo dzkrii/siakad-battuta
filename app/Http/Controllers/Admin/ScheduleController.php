@@ -14,11 +14,22 @@ use App\Models\Faculty;
 use App\Models\Schedule;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Inertia\Response;
 use Throwable;
 
-class ScheduleController extends Controller
+class ScheduleController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('validateClassroom', only: ['store', 'update']),
+            new Middleware('validateCourse', only: ['store', 'update']),
+            new Middleware('validateDepartment', only: ['store', 'update']),
+        ];
+    }
+
     public function index(): Response
     {
         $schedules = Schedule::query()

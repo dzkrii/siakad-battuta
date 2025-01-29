@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Middleware\CheckActiveAcademicYear;
+use App\Http\Middleware\CheckFeeStudent;
+use App\Http\Middleware\ValidateClassroom;
+use App\Http\Middleware\ValidateCourse;
+use App\Http\Middleware\ValidateDepartment;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
         ])->alias(aliases: [
             'role' => RoleMiddleware::class,
+            'checkActiveAcademicYear' => CheckActiveAcademicYear::class,
+            'checkFeeStudent' => CheckFeeStudent::class,
+            'validateClassroom' => ValidateClassroom::class,
+            'validateCourse' => ValidateCourse::class,
+            'validateDepartment' => ValidateDepartment::class,
         ]);
 
         //

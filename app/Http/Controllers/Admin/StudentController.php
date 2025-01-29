@@ -15,14 +15,23 @@ use App\Models\User;
 use App\Traits\HasFile;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Inertia\Response;
 use Throwable;
 
-class StudentController extends Controller
+class StudentController extends Controller implements HasMiddleware
 {
     use HasFile;
+
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('validateDepartment', only: ['store', 'update']),
+        ];
+    }
 
     public function index(): Response
     {

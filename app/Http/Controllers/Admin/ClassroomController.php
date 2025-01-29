@@ -11,11 +11,20 @@ use App\Models\Department;
 use App\Models\Faculty;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controllers\HasMiddleware;
+use Illuminate\Routing\Controllers\Middleware;
 use Inertia\Response;
 use Throwable;
 
-class ClassroomController extends Controller
+class ClassroomController extends Controller implements HasMiddleware
 {
+    public static function middleware(): array
+    {
+        return [
+            new Middleware('validateDepartment', only: ['store', 'update']),
+        ];
+    }
+
     public function index(): Response
     {
         $classrooms = Classroom::query()

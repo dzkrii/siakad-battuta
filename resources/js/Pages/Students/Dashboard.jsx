@@ -14,7 +14,7 @@ export default function Dashboard(props) {
                 </div>
             </div>
 
-            <div className="mb-8 grid gap-4 lg:grid-cols-3">
+            <div className="mb-8 grid gap-4 lg:grid-cols-2">
                 <CardStat
                     data={{
                         title: 'Kartu Rencana Studi Diterima',
@@ -35,7 +35,7 @@ export default function Dashboard(props) {
                 >
                     <div className="text-2xl font-bold">{props.count.study_plans_reject}</div>
                 </CardStat>
-                <CardStat
+                {/* <CardStat
                     data={{
                         title: 'Total Pembayaran',
                         icon: IconCreditCard,
@@ -44,7 +44,7 @@ export default function Dashboard(props) {
                     }}
                 >
                     <div className="text-2xl font-bold">{props.count.total_payments}</div>
-                </CardStat>
+                </CardStat> */}
             </div>
         </div>
     );
