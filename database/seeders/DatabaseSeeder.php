@@ -18,11 +18,11 @@ class DatabaseSeeder extends Seeder
         $this->call(DepartmentSeeder::class);
         $this->call(AcademicYearSeeder::class);
         $this->call(FeegroupSeeder::class);
-        $this->call(TeacherSeeder::class);
-        $this->call(StudentSeeder::class);
-        $this->call(ClassroomSeeder::class);
-        $this->call(CourseSeeder::class);
-        $this->call(ScheduleSeeder::class);
+        // $this->call(TeacherSeeder::class);
+        // $this->call(StudentSeeder::class);
+        // $this->call(ClassroomSeeder::class);
+        // $this->call(CourseSeeder::class);
+        // $this->call(ScheduleSeeder::class);
 
         User::factory()->create([
             'name' => 'Monkey D Luffy',
