@@ -1,6 +1,5 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import NavigationMenu from '@/Components/NavigationMenu';
-import NavLink from '@/Components/NavLink';
 import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
 import { Button } from '@/Components/ui/button';
 import {
@@ -219,16 +218,16 @@ export default function HeaderStudentLayout({ auth, url }) {
                                     </div>
                                 </div>
                                 <div className="mt-3 space-y-1 px-2">
-                                    {/* <Disclosure.Button
-                                        as="button"
+                                    <Disclosure.Button
+                                        as={Link}
                                         href={route('logout')}
                                         method="post"
                                         className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-blue-500"
                                     >
                                         Logout
-                                    </Disclosure.Button> */}
+                                    </Disclosure.Button>
 
-                                    <ul className="mt-4 list-none">
+                                    {/* <ul className="mt-4 list-none">
                                         <li className="list-none">
                                             <NavLink
                                                 url={route('logout')}
@@ -240,7 +239,7 @@ export default function HeaderStudentLayout({ auth, url }) {
                                                 className="list-none"
                                             />
                                         </li>
-                                    </ul>
+                                    </ul> */}
                                 </div>
                             </div>
                         </Disclosure.Panel>
