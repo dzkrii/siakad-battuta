@@ -229,7 +229,8 @@ export default function Index(props) {
                 </CardContent>
                 <CardFooter className="flex w-full flex-col items-center justify-between gap-y-2 border-t py-3 lg:flex-row">
                     <p className="text-sm text-muted-foreground">
-                        Menampilkan <span className="font-medium">{meta.from ?? 0}</span> dari {meta.total} jadwal
+                        Menampilkan <span className="font-medium">{meta.from ?? 0}</span> -{' '}
+                        <span className="font-medium">{meta.to ?? 0}</span> dari {meta.total} jadwal
                     </p>
                     <div className="overflow-x-auto">
                         {meta.has_pages && <PaginationTable meta={meta} links={links} />}

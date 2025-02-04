@@ -27,7 +27,7 @@ export default function Login({ status, canResetPassword }) {
         <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
             <div className="flex flex-col px-6 py-4">
                 <ApplicationLogo
-                    bgLogo="from-blue-500 via-blue-600 to-blue-600"
+                    bgLogo="from-green-500 via-green-600 to-green-600"
                     colorLogo="text-white"
                     colorText="text-white"
                 />
@@ -88,11 +88,22 @@ export default function Login({ status, canResetPassword }) {
                                     {errors.remember && <InputError message={errors.remember} />}
                                 </div>
 
-                                <Button type="submit" variant="blue" size="xl" className="w-full" disabled={processing}>
+                                <Button
+                                    type="submit"
+                                    variant="green"
+                                    size="xl"
+                                    className="w-full"
+                                    disabled={processing}
+                                >
                                     Masuk
                                 </Button>
                             </div>
                         </form>
+                        <h3 className="font-bold">Catatan : </h3>
+                        <p className="text-muted-foreground">
+                            Setiap mahasiswa/i dapat login dengan email : [nim]@battuta.ac.id
+                        </p>
+                        <p className="text-muted-foreground">Contoh : 123456789@battuta.ac.id</p>
                     </div>
                 </div>
             </div>

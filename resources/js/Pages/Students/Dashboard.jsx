@@ -1,6 +1,6 @@
 import CardStat from '@/Components/CardStat';
 import StudentLayout from '@/Layouts/StudentLayout';
-import { IconCheck, IconCreditCard, IconX } from '@tabler/icons-react';
+import { IconCheck, IconX } from '@tabler/icons-react';
 
 export default function Dashboard(props) {
     return (

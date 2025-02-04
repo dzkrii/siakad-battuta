@@ -69,7 +69,7 @@ export default function AppLayout({ title, children }) {
                                             </button>
                                         </div>
                                     </Transition.Child>
-                                    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 px-6 pb-2">
+                                    <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-gradient-to-b from-green-600 via-green-700 to-green-800 px-6 pb-2">
                                         {/* sidebar responsive */}
                                         <SidebarResponsive auth={auth} url={url} />
                                     </div>
@@ -80,7 +80,7 @@ export default function AppLayout({ title, children }) {
                 </Transition.Root>
 
                 <div className="hidden p-2.5 lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-                    <div className="flex grow flex-col gap-y-5 overflow-y-auto rounded-xl border bg-gradient-to-b from-blue-500 via-blue-600 to-blue-700 px-4">
+                    <div className="flex grow flex-col gap-y-5 overflow-y-auto rounded-xl border bg-gradient-to-b from-green-600 via-green-700 to-green-800 px-4">
                         {/* sidebar */}
                         <Sidebar auth={auth} url={url} />
                     </div>

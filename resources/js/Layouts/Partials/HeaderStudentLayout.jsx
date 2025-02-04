@@ -20,7 +20,7 @@ export default function HeaderStudentLayout({ auth, url }) {
         <>
             <Disclosure
                 as="nav"
-                className="border-b border-blue-300 border-opacity-25 bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 py-4 lg:border-none"
+                className="border-b border-green-300 border-opacity-25 bg-gradient-to-r from-green-500 via-green-600 to-green-700 py-4 lg:border-none"
             >
                 {({ open }) => (
                     <>
@@ -82,13 +82,13 @@ export default function HeaderStudentLayout({ auth, url }) {
                                         <DropdownMenu>
                                             <DropdownMenuTrigger asChild>
                                                 <Button
-                                                    variant="blue"
+                                                    variant="green"
                                                     size="xl"
                                                     className="data-[state=open]:bg-orange-500 data-[state=open]:text-white"
                                                 >
                                                     <Avatar className="size-8 rounded-lg">
                                                         <AvatarImage src={auth.avatar} />
-                                                        <AvatarFallback className="rounded-lg text-blue-600">
+                                                        <AvatarFallback className="rounded-lg text-green-600">
                                                             {auth.name.substring(0, 1)}
                                                         </AvatarFallback>
                                                     </Avatar>
@@ -112,7 +112,7 @@ export default function HeaderStudentLayout({ auth, url }) {
                                                     <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                                         <Avatar className="size-8 rounded-lg">
                                                             <AvatarImage src={auth.avatar} />
-                                                            <AvatarFallback className="rounded-lg text-blue-600">
+                                                            <AvatarFallback className="rounded-lg text-green-600">
                                                                 {auth.name.substring(0, 1)}
                                                             </AvatarFallback>
                                                         </Avatar>
@@ -146,8 +146,8 @@ export default function HeaderStudentLayout({ auth, url }) {
                                     href={route('students.dashboard')}
                                     className={cn(
                                         url.startsWith('/students/dashboard')
-                                            ? 'bg-blue-500 text-white'
-                                            : 'text-white hover:bg-blue-500',
+                                            ? 'bg-green-500 text-white'
+                                            : 'text-white hover:bg-green-500',
                                         'block rounded-md px-3 py-2 text-base font-medium',
                                     )}
                                 >
@@ -158,8 +158,8 @@ export default function HeaderStudentLayout({ auth, url }) {
                                     href={route('students.schedules.index')}
                                     className={cn(
                                         url.startsWith('/students/schedules')
-                                            ? 'bg-blue-500 text-white'
-                                            : 'text-white hover:bg-blue-500',
+                                            ? 'bg-green-500 text-white'
+                                            : 'text-white hover:bg-green-500',
                                         'block rounded-md px-3 py-2 text-base font-medium',
                                     )}
                                 >
@@ -170,8 +170,8 @@ export default function HeaderStudentLayout({ auth, url }) {
                                     href={route('students.study-plans.index')}
                                     className={cn(
                                         url.startsWith('/students/study-plans')
-                                            ? 'bg-blue-500 text-white'
-                                            : 'text-white hover:bg-blue-500',
+                                            ? 'bg-green-500 text-white'
+                                            : 'text-white hover:bg-green-500',
                                         'block rounded-md px-3 py-2 text-base font-medium',
                                     )}
                                 >
@@ -182,8 +182,8 @@ export default function HeaderStudentLayout({ auth, url }) {
                                     href={route('students.study-results.index')}
                                     className={cn(
                                         url.startsWith('/students/study-results')
-                                            ? 'bg-blue-500 text-white'
-                                            : 'text-white hover:bg-blue-500',
+                                            ? 'bg-green-500 text-white'
+                                            : 'text-white hover:bg-green-500',
                                         'block rounded-md px-3 py-2 text-base font-medium',
                                     )}
                                 >
@@ -194,8 +194,8 @@ export default function HeaderStudentLayout({ auth, url }) {
                                     href={route('students.fees.index')}
                                     className={cn(
                                         url.startsWith('/students/fees')
-                                            ? 'bg-blue-500 text-white'
-                                            : 'text-white hover:bg-blue-500',
+                                            ? 'bg-green-500 text-white'
+                                            : 'text-white hover:bg-green-500',
                                         'block rounded-md px-3 py-2 text-base font-medium',
                                     )}
                                 >
@@ -222,7 +222,7 @@ export default function HeaderStudentLayout({ auth, url }) {
                                         as={Link}
                                         href={route('logout')}
                                         method="post"
-                                        className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-blue-500"
+                                        className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-green-500"
                                     >
                                         Logout
                                     </Disclosure.Button>

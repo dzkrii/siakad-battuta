@@ -23,7 +23,7 @@ export default function StudentLayout({ children, title }) {
             <Head title={title} />
             <Toaster position="top-center" richColors />
             <div className="min-h-full">
-                <div className="bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 pb-32">
+                <div className="bg-gradient-to-r from-green-500 via-green-600 to-green-700 pb-32">
                     {/* Header Layout */}
                     <HeaderStudentLayout auth={auth} url={url} />
                 </div>

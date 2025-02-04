@@ -63,8 +63,8 @@ export default function Index(props) {
                 )}
                 <div className="flex w-full flex-col items-center justify-between gap-y-2 lg:flex-row">
                     <p className="text-sm text-muted-foreground">
-                        Menampilkan <span className="font-medium">{meta.from ?? 0}</span> dari {meta.total} kartu hasil
-                        studi
+                        Menampilkan <span className="font-medium">{meta.from ?? 0}</span> -{' '}
+                        <span className="font-medium">{meta.to ?? 0}</span> dari {meta.total} kartu hasil studi
                     </p>
                     <div className="overflow-x-auto">
                         {meta.has_pages && <PaginationTable meta={meta} links={links} />}

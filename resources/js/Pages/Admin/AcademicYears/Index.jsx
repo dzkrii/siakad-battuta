@@ -126,7 +126,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead className='text-center'>
+                                    <TableHead className="text-center">
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -138,7 +138,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead className='text-center'>
+                                    <TableHead className="text-center">
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -172,8 +172,8 @@ export default function Index(props) {
                                         <TableCell>{academicYear.name}</TableCell>
                                         <TableCell>{formatDateIndo(academicYear.start_date)}</TableCell>
                                         <TableCell>{formatDateIndo(academicYear.end_date)}</TableCell>
-                                        <TableCell className='text-center'>{academicYear.semester}</TableCell>
-                                        <TableCell className='text-center'>{academicYear.is_active}</TableCell>
+                                        <TableCell className="text-center">{academicYear.semester}</TableCell>
+                                        <TableCell className="text-center">{academicYear.is_active}</TableCell>
                                         <TableCell>{formatDateIndo(academicYear.created_at)}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-x-1">
@@ -204,7 +204,8 @@ export default function Index(props) {
                 </CardContent>
                 <CardFooter className="flex w-full flex-col items-center justify-between gap-y-2 border-t py-3 lg:flex-row">
                     <p className="text-sm text-muted-foreground">
-                        Menampilkan <span className="font-medium">{meta.from ?? 0}</span> dari {meta.total} tahun ajaran
+                        Menampilkan <span className="font-medium">{meta.from ?? 0}</span> -{' '}
+                        <span className="font-medium">{meta.to ?? 0}</span> dari {meta.total} tahun ajaran
                     </p>
                     <div className="overflow-x-auto">
                         {meta.has_pages && <PaginationTable meta={meta} links={links} />}

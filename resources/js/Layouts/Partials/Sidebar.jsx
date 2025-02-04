@@ -25,7 +25,7 @@ export default function Sidebar({ auth, url }) {
                 <li className="-mx-6">
                     <Link
                         href="#"
-                        className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white hover:bg-blue-800"
+                        className="flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-white hover:bg-green-800"
                     >
                         <Avatar>
                             <AvatarImage src={auth.avatar} />
