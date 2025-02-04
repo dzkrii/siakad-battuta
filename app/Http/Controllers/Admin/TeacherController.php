@@ -27,7 +27,7 @@ class TeacherController extends Controller implements HasMiddleware
     public static function middleware(): array
     {
         return [
-            new Middleware('validateDepartment', only: ['store', 'update']),
+            // new Middleware('validateDepartment', only: ['store', 'update']),
         ];
     }
 
@@ -88,7 +88,7 @@ class TeacherController extends Controller implements HasMiddleware
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make($request->password),
+                'password' => Hash::make("dosensiakad01"),
                 'avatar' => $this->upload_file($request, 'avatar', 'users'),
             ]);
 

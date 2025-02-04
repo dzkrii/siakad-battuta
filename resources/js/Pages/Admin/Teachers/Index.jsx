@@ -198,9 +198,9 @@ export default function Index(props) {
                                             <span>{teacher.user.name}</span>
                                         </TableCell>
                                         <TableCell>{teacher.user.email}</TableCell>
-                                        <TableCell>{teacher.faculty.name}</TableCell>
-                                        <TableCell>{teacher.department.name}</TableCell>
-                                        <TableCell>{teacher.teacher_number}</TableCell>
+                                        <TableCell>{teacher.faculty?.name}</TableCell>
+                                        <TableCell>{teacher.department?.name}</TableCell>
+                                        <TableCell>{teacher?.teacher_number}</TableCell>
                                         <TableCell>{teacher.academic_title}</TableCell>
                                         <TableCell>{formatDateIndo(teacher.created_at)}</TableCell>
                                         <TableCell>
