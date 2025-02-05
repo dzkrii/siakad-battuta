@@ -102,7 +102,7 @@ export default function Index(props) {
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
-                                            onClick={() => onSortable('code')}
+                                            onClick={() => onSortable('kode_matkul')}
                                         >
                                             Kode Matkul
                                             <span className="ml-2 flex-none rounded text-muted-foreground">
@@ -213,7 +213,7 @@ export default function Index(props) {
                                 {courses.map((course, index) => (
                                     <TableRow key={index}>
                                         <TableCell>{index + 1 + (meta.current_page - 1) * meta.per_page}</TableCell>
-                                        <TableCell>{course.code}</TableCell>
+                                        <TableCell>{course.kode_matkul}</TableCell>
                                         <TableCell>{course.name}</TableCell>
                                         <TableCell>{course.faculty.name}</TableCell>
                                         <TableCell>{course.department.name}</TableCell>

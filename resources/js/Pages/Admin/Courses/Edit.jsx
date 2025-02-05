@@ -16,7 +16,7 @@ export default function Edit(props) {
         faculty_id: props.course.faculty_id ?? null,
         department_id: props.course.department_id ?? null,
         teacher_id: props.course.teacher_id ?? null,
-        code: props.course.code ?? '',
+        kode_matkul: props.course.kode_matkul ?? '',
         name: props.course.name ?? '',
         credit: props.course.credit ?? '',
         semester: props.course.semester ?? 1,
@@ -63,16 +63,16 @@ export default function Edit(props) {
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
                             {/* Kode */}
                             <div className="col-span-full">
-                                <Label htmlFor="code">Kode</Label>
+                                <Label htmlFor="kode_matkul">Kode</Label>
                                 <Input
                                     type="text"
-                                    name="code"
-                                    id="code"
-                                    value={data.code}
+                                    name="kode_matkul"
+                                    id="kode_matkul"
+                                    value={data.kode_matkul}
                                     onChange={onHandleChange}
                                     placeholder="Masukkan kode mata kuliah"
                                 />
-                                {errors.code && <InputError message={errors.code} />}
+                                {errors.kode_matkul && <InputError message={errors.kode_matkul} />}
                             </div>
                             {/* Nama */}
                             <div className="col-span-full">

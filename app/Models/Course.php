@@ -15,6 +15,7 @@ class Course extends Model
         'teacher_id',
         'academic_year_id',
         'code',
+        'kode_matkul',
         'name',
         'credit',
         'semester',
