@@ -29,7 +29,7 @@ class CourseController extends Controller implements HasMiddleware
     public function index(): Response
     {
         $courses = Course::query()
-            ->select(['courses.id', 'courses.faculty_id', 'courses.department_id', 'courses.teacher_id', 'courses.academic_year_id', 'courses.name', 'courses.code', 'courses.kode_matkul', 'courses.credit', 'courses.semester', 'courses.created_at'])
+            ->select(['courses.id', 'courses.faculty_id', 'courses.department_id', 'courses.teacher_id', 'courses.academic_year_id', 'courses.name', 'courses.kode_matkul', 'courses.credit', 'courses.semester', 'courses.created_at'])
             ->filter(request()->only(['search']))
             ->sorting(request()->only(['field', 'direction']))
             ->with(['faculty', 'department', 'teacher'])
@@ -94,7 +94,6 @@ class CourseController extends Controller implements HasMiddleware
                 'department_id' => $request->department_id,
                 'teacher_id' => $request->teacher_id,
                 'academic_year_id' => activeAcademicYear()->id,
-                'code' => str()->random(6),
                 'kode_matkul' => $request->kode_matkul,
                 'name' => $request->name,
                 'credit' => $request->credit,

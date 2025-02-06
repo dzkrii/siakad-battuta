@@ -110,9 +110,9 @@ Route::prefix('admin')->middleware(['auth', 'role:Admin'])->group(function () {
         Route::get('courses', 'index')->name('admin.courses.index');
         Route::get('courses/create', 'create')->name('admin.courses.create');
         Route::post('courses/create', 'store')->name('admin.courses.store');
-        Route::get('courses/edit/{course:code}', 'edit')->name('admin.courses.edit');
-        Route::put('courses/edit/{course:code}', 'update')->name('admin.courses.update');
-        Route::delete('courses/destroy/{course:code}', 'destroy')->name('admin.courses.destroy');
+        Route::get('courses/edit/{course}', 'edit')->name('admin.courses.edit');
+        Route::put('courses/edit/{course}', 'update')->name('admin.courses.update');
+        Route::delete('courses/destroy/{course}', 'destroy')->name('admin.courses.destroy');
     });
 
     Route::controller(ScheduleController::class)->group(function () {
