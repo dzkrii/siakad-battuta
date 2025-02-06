@@ -24,6 +24,11 @@ export default function Create(props) {
         _method: props.page_settings.method,
     });
 
+    const options = props.courses.map((course) => ({
+        value: course.value,
+        label: `${course.label} - ${course.teacher} - ${course.department}`,
+    }));
+
     const onHandleChange = (e) => setData(e.target.name, e.target.value);
 
     const onHandleSubmit = (e) => {
@@ -112,6 +117,7 @@ export default function Create(props) {
                                 <Select
                                     defaultValue={data.course_id}
                                     onValueChange={(value) => setData('course_id', value)}
+                                    isSeachable={true}
                                 >
                                     <SelectTrigger>
                                         <SelectValue>
@@ -122,7 +128,7 @@ export default function Create(props) {
                                     <SelectContent>
                                         {props.courses.map((course, index) => (
                                             <SelectItem key={index} value={course.value}>
-                                                {course.label} - {course.teacher}
+                                                {course.label} - {course.teacher} - {course.department}
                                             </SelectItem>
                                         ))}
                                     </SelectContent>

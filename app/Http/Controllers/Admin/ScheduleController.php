@@ -75,14 +75,15 @@ class ScheduleController extends Controller implements HasMiddleware
                 'label' => $item->name,
             ]),
             'courses' => Course::query()
-                ->with(['teacher']) // Memuat relasi teacher
-                ->select(['id', 'name', 'teacher_id'])
+                ->with(['teacher', 'department']) // Memuat relasi teacher
+                ->select(['id', 'name', 'teacher_id', 'department_id'])
                 ->orderBy('name')
                 ->get()
                 ->map(fn($item) => [
                     'value' => $item->id,
                     'label' => $item->name,
-                    'teacher' => $item->teacher?->user?->name, // Menambahkan nama dosen
+                    'teacher' => $item->teacher?->user?->name,
+                    'department' => $item->department?->name,
                 ]),
             'classrooms' => Classroom::query()->select(['id', 'name'])->orderBy('name')->get()->map(fn($item) => [
                 'value' => $item->id,
@@ -134,14 +135,15 @@ class ScheduleController extends Controller implements HasMiddleware
                 'label' => $item->name,
             ]),
             'courses' => Course::query()
-                ->with(['teacher']) // Memuat relasi teacher
-                ->select(['id', 'name', 'teacher_id'])
+                ->with(['teacher', 'department']) // Memuat relasi teacher
+                ->select(['id', 'name', 'teacher_id', 'department_id'])
                 ->orderBy('name')
                 ->get()
                 ->map(fn($item) => [
                     'value' => $item->id,
                     'label' => $item->name,
                     'teacher' => $item->teacher?->user?->name, // Menambahkan nama dosen
+                    'department' => $item->department?->name,
                 ]),
             'classrooms' => Classroom::query()->select(['id', 'name'])->orderBy('name')->get()->map(fn($item) => [
                 'value' => $item->id,
