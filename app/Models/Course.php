@@ -59,7 +59,6 @@ class Course extends Model
     {
         $query->when($filters['search'] ?? null, function ($query, $search) {
             $query->whereAny([
-                'code',
                 'name',
             ], 'REGEXP', $search)
                 ->orWhereHas('teacher.user', fn($query) => $query->whereAny([
