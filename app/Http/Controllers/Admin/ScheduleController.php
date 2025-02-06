@@ -135,7 +135,7 @@ class ScheduleController extends Controller implements HasMiddleware
                 'label' => $item->name,
             ]),
             'courses' => Course::query()
-                ->with(['teacher', 'department']) // Memuat relasi teacher
+                ->with(['teacher', 'department']) // Memuat relasi teacher dan department
                 ->select(['id', 'name', 'teacher_id', 'department_id'])
                 ->orderBy('name')
                 ->get()
