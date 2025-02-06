@@ -37,6 +37,7 @@ class ScheduleResource extends JsonResource
                 'code' => $this->course?->code,
                 'credit' => $this->course?->credit,
                 'teacher' => $this->course?->teacher?->user?->name,
+                'department_id' => $this->course?->department?->name,
             ]),
             'classroom' => $this->whenLoaded('classroom', [
                 'id' => $this->classroom?->id,
