@@ -115,8 +115,9 @@ export default function Edit(props) {
                                 >
                                     <SelectTrigger>
                                         <SelectValue>
-                                            {props.courses.find((course) => course.value == data.course_id)?.label ??
-                                                'Pilih mata kuliah'}
+                                            {props.courses.find((course) => course.value == data.course_id)
+                                                ? `${props.courses.find((course) => course.value == data.course_id)?.label} - ${props.courses.find((course) => course.value == data.course_id)?.teacher}`
+                                                : 'Pilih mata kuliah'}
                                         </SelectValue>
                                     </SelectTrigger>
                                     <SelectContent>
