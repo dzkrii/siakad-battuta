@@ -44,11 +44,11 @@ class StudentRequest extends FormRequest
                 'exists:departments,id'
             ],
             'fee_group_id' => [
-                'required',
+                'nullable',
                 'exists:fee_groups,id'
             ],
             'classroom_id' => [
-                'required',
+                'nullable',
                 'exists:classrooms,id'
             ],
             'student_number' => [
