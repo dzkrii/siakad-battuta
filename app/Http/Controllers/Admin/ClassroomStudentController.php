@@ -25,7 +25,7 @@ class ClassroomStudentController extends Controller
             })
             ->orderBy('student_number')
             ->with(['user'])
-            ->paginate();
+            ->paginate(60);
 
         return inertia('Admin/Classrooms/Students/Index', [
             'page_settings' => [
