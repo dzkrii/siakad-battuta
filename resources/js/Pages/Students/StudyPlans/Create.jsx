@@ -48,7 +48,9 @@ export default function Create(props) {
                     <TableHeader>
                         <TableRow>
                             <TableHead>#</TableHead>
-                            <TableHead>Mata Kuliah</TableHead>
+                            <TableHead>Kode Mata Kuliah</TableHead>
+                            <TableHead>Nama Mata Kuliah</TableHead>
+                            <TableHead>Dosen Pengampu</TableHead>
                             <TableHead>Kelas</TableHead>
                             <TableHead>Hari</TableHead>
                             <TableHead>Jam</TableHead>
@@ -79,7 +81,9 @@ export default function Create(props) {
                                         }}
                                     />
                                 </TableCell>
+                                <TableCell>{schedule.course.kode_matkul}</TableCell>
                                 <TableCell>{schedule.course.name}</TableCell>
+                                <TableCell>{schedule.course.teacher}</TableCell>
                                 <TableCell>{schedule.classroom.name}</TableCell>
                                 <TableCell>{schedule.day_of_week}</TableCell>
                                 <TableCell>
