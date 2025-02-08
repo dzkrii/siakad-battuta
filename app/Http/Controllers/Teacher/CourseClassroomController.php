@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Response;
 use Throwable;
 
@@ -116,12 +117,16 @@ class CourseClassroomController extends Controller
             ->first();
 
         if (!$studyResult) {
+            Log::error("❌ Study result not found for student ID: $studentId");
             return 0;
         }
 
         $studyResultGrades = StudyResultGrade::query()
             ->where('study_result_id', $studyResult->id)
             ->get();
+
+        Log::info("📊 Calculating GPA for student ID: $studentId");
+        Log::info("Total study results: " . $studyResultGrades->count());
 
         $totalScore = 0;
         $totalWeight = 0;
@@ -131,13 +136,19 @@ class CourseClassroomController extends Controller
             $gpaScore = ($finalScore / 100) * 4;
             $weight = $grade->weight_of_value;
 
+            Log::info("📌 Grade ID: {$grade->id}, Final Score: $finalScore, GPA Score: $gpaScore, Weight: $weight");
+
             $totalScore += $gpaScore * $weight;
             $totalWeight += $weight;
         }
 
         if ($totalWeight > 0) {
+            $gpa = min(round($totalScore / $totalWeight, 2), 4);
+            Log::info("✅ Final GPA for Student ID $studentId: $gpa");
             return min(round($totalScore / $totalWeight, 2), 4);
         }
+
+        Log::warning("⚠️ Total weight is 0, returning GPA = 0 for Student ID $studentId");
 
         return 0;
     }
@@ -195,8 +206,10 @@ class CourseClassroomController extends Controller
 
             $studyResult->each(function ($result) use ($course, $classroom) {
                 $final_score = $this->calculateFinalScore(
-                    attendancePercentage: $this->calculateAttendancePercentage(
-                        $this->getAttendanceCount($result->student_id, $course->id, $classroom->id)
+                    attendancePercentage: (
+                        $this->calculateAttendancePercentage(
+                            $this->getAttendanceCount($result->student_id, $course->id, $classroom->id)
+                        )
                     ),
                     taskPercentage: (
                         $this->calculateTaskPercentage(

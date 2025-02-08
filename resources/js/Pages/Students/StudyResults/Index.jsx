@@ -3,10 +3,12 @@ import Grades from '@/Components/Grades';
 import HeaderTitle from '@/Components/HeaderTitle';
 import PaginationTable from '@/Components/PaginationTable';
 import ShowFilter from '@/Components/ShowFilter';
+import { Button } from '@/Components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import StudentLayout from '@/Layouts/StudentLayout';
 import { formatDateIndo } from '@/lib/utils';
-import { IconSchool } from '@tabler/icons-react';
+import { Link } from '@inertiajs/react';
+import { IconPrinter, IconSchool } from '@tabler/icons-react';
 import { useState } from 'react';
 
 export default function Index(props) {
@@ -54,6 +56,11 @@ export default function Index(props) {
                                     <TableCell>
                                         <div className="flex items-center gap-x-1">
                                             <Grades studyResult={studyResult} grades={studyResult.grades} />
+                                            <Button variant="green" size="sm" asChild>
+                                                <Link href="#">
+                                                    <IconPrinter className="size-4" />
+                                                </Link>
+                                            </Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>

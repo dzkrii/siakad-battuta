@@ -15,6 +15,7 @@ class StudyPlan extends Model
         'academic_year_id',
         'status',
         'notes',
+        'semester',
     ];
 
     protected function casts(): array

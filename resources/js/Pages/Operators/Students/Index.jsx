@@ -213,7 +213,7 @@ export default function Index(props) {
                                         </TableCell>
                                         <TableCell>{student.user.email}</TableCell>
                                         <TableCell>{student.classroom?.name}</TableCell>
-                                        <TableCell>{student.feeGroup.group}</TableCell>
+                                        <TableCell>{student.feeGroup?.group}</TableCell>
                                         <TableCell>{student.student_number}</TableCell>
                                         <TableCell>{student.semester}</TableCell>
                                         <TableCell>{student.batch}</TableCell>

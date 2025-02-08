@@ -86,6 +86,7 @@ export default function Index(props) {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>#</TableHead>
+                                <TableHead>Semester</TableHead>
                                 <TableHead>
                                     <Button
                                         variant="ghost"
@@ -129,6 +130,7 @@ export default function Index(props) {
                             {studyPlans.map((studyPlan, index) => (
                                 <TableRow key={index}>
                                     <TableCell>{index + 1 + (meta.current_page - 1) * meta.per_page}</TableCell>
+                                    <TableCell>{studyPlan.academicYear.semester}</TableCell>
                                     <TableCell>{studyPlan.academicYear.name}</TableCell>
                                     <TableCell>
                                         <Badge variant={STUDYPLANSTATUSVARIANT[studyPlan.status]}>

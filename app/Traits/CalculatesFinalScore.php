@@ -26,9 +26,7 @@ trait CalculatesFinalScore
             ->where('classroom_id', $classroomId)
             ->where('category', $category);
 
-        if ($category === 'tugas') {
-            $grade->whereNull('section');
-        } elseif (in_array($category, ['uts', 'uas'])) {
+        if (in_array($category, ['uts', 'uas', 'tugas'])) {
             $grade->whereNull('section');
         }
 

@@ -19,7 +19,7 @@ class GradeOperatorResource extends JsonResource
             'course' => [
                 'id' => $this->course?->id,
                 'name' => $this->course?->name,
-                'code' => $this->course?->code,
+                'kode_matkul' => $this->course?->kode_matkul,
                 'credit' => $this->course?->credit,
             ],
             'letter' => $this->letter,

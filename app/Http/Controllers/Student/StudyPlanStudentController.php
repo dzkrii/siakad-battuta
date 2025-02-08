@@ -11,6 +11,7 @@ use App\Http\Resources\Student\StudyPlanScheduleStudentResource;
 use App\Http\Resources\Student\StudyPlanStudentResource;
 use App\Models\Schedule;
 use App\Models\StudyPlan;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\HasMiddleware;
@@ -80,11 +81,11 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
             ->where('student_id', auth()->user()->student->id)
             ->where('academic_year_id', activeAcademicYear()->id)
             ->where('semester', auth()->user()->student->semester)
-            ->where('status', '!=', StudyPlanStatus::REJECT)
+            ->whereIn('status', [StudyPlanStatus::PENDING, StudyPlanStatus::APPROVED])
             ->exists();
 
         if ($studyPlan) {
-            flashMessage('Anda sudah mengajukan kartu rencana studi....', 'warning');
+            flashMessage('Anda sudah mengajukan kartu rencana studi', 'warning');
             return to_route('students.study-plans.index');
         }
 
@@ -107,6 +108,7 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
             $studyPlan = StudyPlan::create([
                 'student_id' => auth()->user()->student->id,
                 'academic_year_id' => activeAcademicYear()->id,
+                'semester' => auth()->user()->student->semester,
             ]);
 
             $studyPlan->schedules()->attach($request->schedule_id);
@@ -131,5 +133,26 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
             ],
             'studyPlan' => new StudyPlanScheduleStudentResource($studyPlan->load('schedules')),
         ]);
+    }
+
+    public function downloadPdf(StudyPlan $studyPlan)
+    {
+        $studyPlan->load(['schedules.course', 'schedules.classroom', 'academicYear', 'student']);
+
+        $pdf = Pdf::loadView('pdf.study-plan', compact('studyPlan'));
+
+        // Bersihkan nama tahun akademik dari karakter yang tidak diperbolehkan
+        // $academicYear = str_replace(['/', '\\'], '-', $studyPlan->academicYear->name);
+
+        // return response()->streamDownload(
+        //     function () use ($pdf) {
+        //         echo $pdf->output();
+        //     },
+        //     // 'KRS_' . auth()->user()->name . '_' . $academicYear . '.pdf'
+        //     'KRS_' . auth()->user()->name . '.pdf'
+        // );
+
+        // Tampilkan PDF di browser (preview) dengan nama file spesifik
+        return $pdf->stream('KRS_' . auth()->user()->name . '.pdf');
     }
 }

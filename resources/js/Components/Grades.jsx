@@ -32,7 +32,7 @@ export default function Grades({ studyResult, grades, name = null }) {
                         {grades.map((grade, index) => (
                             <TableRow key={index}>
                                 <TableCell className="border">{index + 1}</TableCell>
-                                <TableCell className="border">{grade.course.code}</TableCell>
+                                <TableCell className="border">{grade.course.kode_matkul}</TableCell>
                                 <TableCell className="border">{grade.course.name}</TableCell>
                                 <TableCell className="border">{grade.course.credit}</TableCell>
                                 <TableCell className="border">{grade.letter}</TableCell>
@@ -44,9 +44,9 @@ export default function Grades({ studyResult, grades, name = null }) {
                     <TableFooter className="font-bold">
                         <TableRow>
                             <TableCell colSpan="3">IP Semester</TableCell>
-                            <TableCell className="border">{studyResult.gpa}</TableCell>
-                            <TableCell className="border"></TableCell>
-                            <TableCell className="border"></TableCell>
+                            <TableCell colSpan="4" className="border">
+                                {studyResult.gpa}
+                            </TableCell>
                         </TableRow>
                     </TableFooter>
                 </Table>

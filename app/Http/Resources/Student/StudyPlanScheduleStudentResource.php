@@ -8,11 +8,6 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudyPlanScheduleStudentResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
     public function toArray(Request $request): array
     {
         return [
@@ -23,6 +18,7 @@ class StudyPlanScheduleStudentResource extends JsonResource
             'academicYear' => $this->whenLoaded('academicYear', [
                 'id' => $this->academicYear?->id,
                 'name' => $this->academicYear?->name,
+                'semester' => $this->academicYear?->semester,
             ]),
             'schedules' => $this->whenLoaded('schedules', ScheduleResource::collection($this->schedules)),
         ];
