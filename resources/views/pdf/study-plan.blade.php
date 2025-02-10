@@ -6,8 +6,9 @@
     <title>Kartu Rencana Studi</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
+            font-family: "Times New Roman", serif;
+            font-size: 12pt;
+            /* padding: 20px; */
         }
 
         .header {
@@ -28,7 +29,7 @@
         th,
         td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 4px;
             text-align: center;
         }
 
@@ -55,6 +56,13 @@
 </head>
 
 <body>
+    <div style="display: flex; justify-content: center; align-items: center; text-align: center; margin-bottom: 10px;">
+        <img src="{{ public_path('battuta.png') }}" alt="Logo Universitas Battuta"
+            style="width: 100px; vertical-align: middle">
+        <h1 style="display: inline-block; vertical-align: middle; font-size: 40px; margin-left: 10px">UNIVERSITAS BATTUTA
+        </h1>
+        <hr>
+    </div>
     <div class="header">
         <h2>KARTU RENCANA STUDI (KRS)</h2>
     </div>
@@ -87,13 +95,13 @@
     <table>
         <thead>
             <tr>
-                <th rowspan="2">No</th>
-                <th colspan="2">Mata Kuliah</th>
+                <th rowspan="2">NO</th>
+                <th colspan="2">MATA KULIAH</th>
                 <th rowspan="2">SKS</th>
             </tr>
             <tr>
-                <th>Kode</th>
-                <th>Nama</th>
+                <th>KODE</th>
+                <th>NAMA</th>
             </tr>
         </thead>
         <tbody>
@@ -113,7 +121,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <td colspan="3" style="text-align: center; font-weight: bold">Total</td>
+                <td colspan="3" style="text-align: center; font-weight: bold">TOTAL</td>
                 <td style="text-align: center; font-weight: bold">{{ $totalSks }}</td>
             </tr>
         </tfoot>
@@ -138,11 +146,12 @@
     <table style="margin-top: 50px">
         <tr>
             <td class="tanda-tangan"></td>
-            <td class="tanda-tangan">Medan, {{ date('d F Y') }}</td>
+            <td class="tanda-tangan" style="padding-left: 60px">Medan,
+                {{ \Carbon\Carbon::now()->translatedFormat('d F Y') }}</td>
         </tr>
         <tr>
             <td class="tanda-tangan">Mahasiswa</td>
-            <td class="tanda-tangan">Ketua Program Studi</td>
+            <td class="tanda-tangan" style="padding-left: 60px">Ketua Program Studi</td>
         </tr>
         <tr>
             <td class="tanda-tangan"><br /><br /><br /></td>
@@ -150,13 +159,34 @@
         </tr>
         <tr>
             <td class="tanda-tangan">{{ auth()->user()->name }}</td>
-            <td class="tanda-tangan">
+            <td class="tanda-tangan" style="padding-left: 60px">
                 @if ($studyPlan->student->department_id == 1)
+                    {{-- Informatika --}}
                     Baginda Harahap, S.Pd., M.Kom.
                 @elseif ($studyPlan->student->department_id == 2)
+                    {{--  Teknologi Informasi --}}
                     Aripin Rambe, S.Kom., M.Kom.
                 @elseif ($studyPlan->student->department_id == 3)
+                    {{--  Sistem Informasi --}}
                     Fahmi Ruziq, S.T., M.Kom.
+                @elseif ($studyPlan->student->department_id == 4)
+                    {{--  Akuntansi --}}
+                    Fhikry Ahmad H. Srg., S.E., M.Ak.
+                @elseif ($studyPlan->student->department_id == 5)
+                    {{--  Kewirausahaan --}}
+                    Atika Aini Nasution, S.E., M.M.
+                @elseif ($studyPlan->student->department_id == 6)
+                    {{--  Manajemen --}}
+                    Amril, S.Kom., M.M.
+                @elseif ($studyPlan->student->department_id == 7)
+                    {{--  Hukum --}}
+                    Junaidi Lubis, S.H., M.H.
+                @elseif ($studyPlan->student->department_id == 8)
+                    {{-- PGSD --}}
+                    Nur Wahyuni, S.Pd., M.Pd.
+                @elseif ($studyPlan->student->department_id == 9)
+                    {{-- PGPAUD --}}
+                    Putri Sari Ulfa, S.Pd., M.Pd.
                 @endif
             </td>
         </tr>

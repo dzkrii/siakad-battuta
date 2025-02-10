@@ -141,6 +141,8 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
 
         $pdf = Pdf::loadView('pdf.study-plan', compact('studyPlan'));
 
+        $pdf->setPaper('A4', 'potrait');
+
         // Bersihkan nama tahun akademik dari karakter yang tidak diperbolehkan
         // $academicYear = str_replace(['/', '\\'], '-', $studyPlan->academicYear->name);
 
