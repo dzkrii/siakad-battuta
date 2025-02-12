@@ -103,8 +103,8 @@ export default function Login({ status, canResetPassword }) {
                         <p className="text-muted-foreground">
                             Setiap mahasiswa/i dapat login dengan email : [nim]@battuta.ac.id
                         </p>
-                        <p className="text-muted-foreground">Password : mahasiswa</p>
                         <p className="text-muted-foreground">Contoh : 123456789@battuta.ac.id</p>
+                        <p className="text-muted-foreground">Password : mahasiswa</p>
                     </div>
                 </div>
             </div>
