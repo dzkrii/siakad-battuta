@@ -17,6 +17,10 @@ Route::prefix('students')->middleware(['auth', 'role:Student'])->group(function 
     Route::post('study-plans/create', 'store')->name('students.study-plans.store');
     Route::get('study-plans/detail/{studyPlan}', 'show')->name('students.study-plans.show');
     Route::get('study-plans/download/{studyPlan}', 'downloadPdf')->name('students.study-plans.download');
+
+    // Route untuk pemilihan kelas sebelum mebuat krs baru
+    Route::get('study-plans/select-classroom', 'selectClassroom')->name('students.study-plans.select-classroom');
+    Route::post('study-plans/select-classroom', 'storeClassroom')->name('students.study-plans.store-classroom');
   });
 
   Route::get('schedules', ScheduleStudentController::class)->name('students.schedules.index');

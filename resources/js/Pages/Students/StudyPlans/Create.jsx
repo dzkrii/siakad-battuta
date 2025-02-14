@@ -14,6 +14,8 @@ export default function Create(props) {
         _method: props.page_settings.method,
     });
 
+    console.log(props);
+
     const onHandleSubmit = (e) => {
         e.preventDefault();
         post(props.page_settings.action, {

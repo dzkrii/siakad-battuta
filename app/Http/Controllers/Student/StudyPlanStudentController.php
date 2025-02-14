@@ -9,6 +9,7 @@ use App\Http\Requests\Student\StudyPlanStudentRequest;
 use App\Http\Resources\Admin\ScheduleResource;
 use App\Http\Resources\Student\StudyPlanScheduleStudentResource;
 use App\Http\Resources\Student\StudyPlanStudentResource;
+use App\Models\Classroom;
 use App\Models\Schedule;
 use App\Models\StudyPlan;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -58,9 +59,50 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
         ]);
     }
 
+    public function selectClassroom(): Response
+    {
+        $student = auth()->user()->student;
+        $availableClassrooms = Classroom::query()
+            ->where('faculty_id', $student->faculty_id)
+            ->where('department_id', $student->department_id)
+            ->get();
+
+        return inertia('Students/StudyPlans/SelectClassroom', [
+            'page_settings' => [
+                'title' => 'Pilih Kelas',
+                'subtitle' => 'Anda belum memiliki kelas, silakan pilih kelas yang tersedia',
+                'method' => 'POST',
+                'action' => route('students.study-plans.store-classroom'),
+            ],
+            'classrooms' => $availableClassrooms,
+        ]);
+    }
+
+    public function storeClassroom(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'classroom_id' => 'required|exists:classrooms,id',
+        ]);
+
+        $student = auth()->user()->student;
+        $student->update([
+            'classroom_id' => $request->classroom_id,
+        ]);
+
+        flashMessage('Kelas berhasil dipilih!', 'success');
+        return to_route('students.study-plans.create');
+    }
+
     public function create(): Response | RedirectResponse
     {
         if (!activeAcademicYear()) return back();
+
+        // Periksa apakah mahasiswa sudah memiliki kelas
+        $student = auth()->user()->student;
+        if (!$student->classroom_id) {
+            // Redirect ke halaman pemilihan kelas jika belum memiliki kelas
+            return to_route('students.study-plans.select-classroom');
+        }
 
         $schedules = Schedule::query()
             ->where('faculty_id', auth()->user()->student->faculty_id)
