@@ -43,7 +43,7 @@ export default function Index(props) {
                 <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
                     <Link href={route('students.study-plans.create')}>
                         <IconPlus className="size-4" />
-                        Tambah
+                        Ajukan KRS
                     </Link>
                 </Button>
             </div>
