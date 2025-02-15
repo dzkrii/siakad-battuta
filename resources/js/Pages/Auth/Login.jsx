@@ -5,6 +5,7 @@ import { Button } from '@/Components/ui/button';
 import { Checkbox } from '@/Components/ui/checkbox';
 import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
+import WhatsAppHelpdesk from '@/Components/WhatsAppHelpdesk';
 import GuestLayout from '@/Layouts/GuestLayout';
 import { useForm } from '@inertiajs/react';
 
@@ -111,6 +112,7 @@ export default function Login({ status, canResetPassword }) {
             <div className="hidden bg-muted lg:block">
                 <img src="/images/gedung-baru-battuta.jpg" alt="login" className="object-fit w-full" />
             </div>
+            <WhatsAppHelpdesk />
         </div>
     );
 }
