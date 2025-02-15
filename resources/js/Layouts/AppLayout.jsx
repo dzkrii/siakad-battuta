@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback } from '@/Components/ui/avatar';
 import { Toaster } from '@/Components/ui/sonner';
+import WhatsAppHelpdesk from '@/Components/WhatsAppHelpdesk';
 import { flashMessage } from '@/lib/utils';
 import { Dialog, Transition } from '@headlessui/react';
 import { Head, Link, usePage } from '@inertiajs/react';
@@ -105,6 +106,9 @@ export default function AppLayout({ title, children }) {
                 <main className="py-4 lg:pl-72">
                     <div className="px-4">{children}</div>
                 </main>
+
+                {/* Whatsapp Helpdesk */}
+                <WhatsAppHelpdesk />
             </div>
         </>
     );

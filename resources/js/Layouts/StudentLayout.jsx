@@ -1,6 +1,7 @@
 import Banner from '@/Components/Banner';
 import { Card, CardContent } from '@/Components/ui/card';
 import { Toaster } from '@/Components/ui/sonner';
+import WhatsAppHelpdesk from '@/Components/WhatsAppHelpdesk';
 import { flashMessage } from '@/lib/utils';
 import { Head, usePage } from '@inertiajs/react';
 import { useEffect } from 'react';
@@ -37,6 +38,9 @@ export default function StudentLayout({ children, title }) {
                         <Banner message=" Harap melakukan pembayaran uang kuliah tunggal terlebih dahulu" />
                     )}
                 </main>
+
+                {/* Whatsapp Helpdesk */}
+                <WhatsAppHelpdesk />
             </div>
         </>
     );
