@@ -83,7 +83,7 @@
             </tr>
             <tr>
                 <td style="border: none; text-align: left">Semester</td>
-                <td style="border: none; text-align: left">: {{ $studyPlan->academicYear->semester }}</td>
+                <td style="border: none; text-align: left">: {{ $studyPlan->semester }}</td>
             </tr>
             <tr>
                 <td style="border: none; text-align: left">Tahun Akademik</td>
