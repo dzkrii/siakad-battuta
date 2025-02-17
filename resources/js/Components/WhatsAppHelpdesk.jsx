@@ -1,6 +1,6 @@
 export default function WhatsAppHelpdesk() {
     const phoneNumber = '6285362489310'; // Nomor WhatsApp Anda
-    const message = 'Halo, saya butuh bantuan terkait Siakad.'; // Pesan default
+    const message = ''; // Pesan default
 
     return (
         <div className="tooltip" style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000 }}>
