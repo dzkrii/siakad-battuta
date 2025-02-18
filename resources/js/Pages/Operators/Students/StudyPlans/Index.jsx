@@ -2,7 +2,6 @@ import EmptyState from '@/Components/EmptyState';
 import HeaderTitle from '@/Components/HeaderTitle';
 import PaginationTable from '@/Components/PaginationTable';
 import ShowFilter from '@/Components/ShowFilter';
-import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader } from '@/Components/ui/card';
 import { Input } from '@/Components/ui/input';
@@ -10,9 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import UseFilter from '@/hooks/UseFilter.';
 import AppLayout from '@/Layouts/AppLayout';
-import { formatDateIndo } from '@/lib/utils';
-import { Link } from '@inertiajs/react';
-import { IconArrowLeft, IconArrowsDownUp, IconBuilding, IconRefresh } from '@tabler/icons-react';
+import { IconArrowsDownUp, IconBuilding, IconRefresh } from '@tabler/icons-react';
 import { useState } from 'react';
 import Approve from './Approve';
 import Detail from './Detail';
@@ -43,12 +40,12 @@ export default function Index(props) {
                     subtitle={props.page_settings.subtitle}
                     icon={IconBuilding}
                 />
-                <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
+                {/* <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
                     <Link href={route('operators.students.index')}>
                         <IconArrowLeft className="size-4" />
                         Kembali
                     </Link>
-                </Button>
+                </Button> */}
             </div>
             <Card>
                 <CardHeader className="mb-4 p-0">
@@ -93,8 +90,8 @@ export default function Index(props) {
                                 <TableRow>
                                     <TableHead>#</TableHead>
                                     <TableHead>Nama</TableHead>
-                                    <TableHead>Kelas</TableHead>
-                                    <TableHead>
+                                    <TableHead className="text-center">Kelas</TableHead>
+                                    {/* <TableHead>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -105,8 +102,8 @@ export default function Index(props) {
                                                 <IconArrowsDownUp className="size-4" />
                                             </span>
                                         </Button>
-                                    </TableHead>
-                                    <TableHead>
+                                    </TableHead> */}
+                                    {/* <TableHead>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -117,8 +114,8 @@ export default function Index(props) {
                                                 <IconArrowsDownUp className="size-4" />
                                             </span>
                                         </Button>
-                                    </TableHead>
-                                    <TableHead>
+                                    </TableHead> */}
+                                    <TableHead className="text-center">
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -130,7 +127,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    <TableHead className="text-center">
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -142,7 +139,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    <TableHead className="text-center">
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -154,7 +151,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    {/* <TableHead>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -165,7 +162,7 @@ export default function Index(props) {
                                                 <IconArrowsDownUp className="size-4" />
                                             </span>
                                         </Button>
-                                    </TableHead>
+                                    </TableHead> */}
                                     <TableHead>Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -175,22 +172,22 @@ export default function Index(props) {
                                         <TableCell>{index + 1 + (meta.current_page - 1) * meta.per_page}</TableCell>
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <Avatar>
+                                                {/* <Avatar>
                                                     <AvatarImage src={studyPlan.student.avatar} />
                                                     <AvatarFallback>
                                                         {studyPlan.student.name.substring(0, 1)}
                                                     </AvatarFallback>
-                                                </Avatar>
+                                                </Avatar> */}
                                                 <span>{studyPlan.student.name}</span>
                                             </div>
                                         </TableCell>
-                                        <TableCell>{studyPlan.student.classroom}</TableCell>
-                                        <TableCell>{studyPlan.student.student_number}</TableCell>
-                                        <TableCell>{studyPlan.academicYear.name}</TableCell>
-                                        <TableCell>{studyPlan.status}</TableCell>
-                                        <TableCell>{studyPlan.notes}</TableCell>
-                                        <TableCell>{studyPlan.semester}</TableCell>
-                                        <TableCell>{formatDateIndo(studyPlan.created_at)}</TableCell>
+                                        <TableCell className="text-center">{studyPlan.student.classroom}</TableCell>
+                                        {/* <TableCell>{studyPlan.student.student_number}</TableCell> */}
+                                        {/* <TableCell>{studyPlan.academicYear.name}</TableCell> */}
+                                        <TableCell className="text-center">{studyPlan.status}</TableCell>
+                                        <TableCell className="text-center">{studyPlan.notes}</TableCell>
+                                        <TableCell className="text-center">{studyPlan.semester}</TableCell>
+                                        {/* <TableCell>{formatDateIndo(studyPlan.created_at)}</TableCell> */}
                                         <TableCell>
                                             <div className="flex items-center gap-x-1">
                                                 {/* detail */}

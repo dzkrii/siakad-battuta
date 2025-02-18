@@ -77,6 +77,7 @@ class Student extends Model
                     'name',
                     'email'
                 ], 'REGEXP', $search))
+                ->orWhereHas('classroom', fn($query) => $query->where('name', 'REGEXP', $search))
                 ->orWhereHas('faculty', fn($query) => $query->where('name', 'REGEXP', $search))
                 ->orWhereHas('department', fn($query) => $query->where('name', 'REGEXP', $search));
         });

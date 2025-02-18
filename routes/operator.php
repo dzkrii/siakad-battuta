@@ -21,6 +21,7 @@ Route::prefix('operators')->middleware(['auth', 'role:Operator'])->group(functio
         Route::get('students/edit/{student:student_number}', 'edit')->name('operators.students.edit');
         Route::put('students/edit/{student:student_number}', 'update')->name('operators.students.update');
         Route::delete('students/destroy/{student:student_number}', 'destroy')->name('operators.students.destroy');
+        Route::get('students/approveStudyPlans', 'approveStudyPlans')->name('operators.students.approveStudyPlans');
     });
 
     Route::controller(TeacherOperatorController::class)->group(function () {

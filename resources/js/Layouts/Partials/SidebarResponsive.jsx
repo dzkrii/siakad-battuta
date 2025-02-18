@@ -159,7 +159,16 @@ export default function SidebarResponsive({ auth, url }) {
                             title="Dosen"
                             icon={IconUsersGroup}
                         />
-                        <div className="px-3 py-2 text-xs font-medium text-white">Akademik</div>
+
+                        <div className="px-3 py-2 text-xs font-medium text-white">Manajemen KRS</div>
+                        <NavLink
+                            url={route('operators.students.approveStudyPlans')}
+                            active={url.startsWith('/operators/students/approveStudyPlans')}
+                            title="Approve KRS"
+                            icon={IconBooks}
+                        />
+
+                        {/* <div className="px-3 py-2 text-xs font-medium text-white">Akademik</div>
                         <NavLink
                             url={route('operators.classrooms.index')}
                             active={url.startsWith('/operators/classrooms')}
@@ -177,7 +186,7 @@ export default function SidebarResponsive({ auth, url }) {
                             active={url.startsWith('/operators/schedules')}
                             title="Jadwal"
                             icon={IconCalendar}
-                        />
+                        /> */}
                     </>
                 )}
 

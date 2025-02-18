@@ -1,4 +1,3 @@
-import AlertAction from '@/Components/AlertAction';
 import EmptyState from '@/Components/EmptyState';
 import HeaderTitle from '@/Components/HeaderTitle';
 import PaginationTable from '@/Components/PaginationTable';
@@ -10,18 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import UseFilter from '@/hooks/UseFilter.';
 import AppLayout from '@/Layouts/AppLayout';
-import { deleteAction } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import {
-    IconArrowsDownUp,
-    IconBooks,
-    IconPencil,
-    IconPlus,
-    IconRefresh,
-    IconSchool,
-    IconTrash,
-    IconUsers,
-} from '@tabler/icons-react';
+import { IconArrowsDownUp, IconBooks, IconRefresh, IconUsers } from '@tabler/icons-react';
 import { useState } from 'react';
 
 export default function Index(props) {
@@ -37,7 +26,7 @@ export default function Index(props) {
     };
 
     UseFilter({
-        route: route('operators.students.index'),
+        route: route('operators.students.approveStudyPlans'),
         values: params,
         only: ['students'],
     });
@@ -50,12 +39,12 @@ export default function Index(props) {
                     subtitle={props.page_settings.subtitle}
                     icon={IconUsers}
                 />
-                <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
+                {/* <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
                     <Link href={route('operators.students.create')}>
                         <IconPlus className="size-4" />
                         Tambah
                     </Link>
-                </Button>
+                </Button> */}
             </div>
             <Card>
                 <CardHeader className="mb-4 p-0">
@@ -111,7 +100,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    <TableHead className="text-center">
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -147,7 +136,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead> */}
-                                    <TableHead>
+                                    {/* <TableHead>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -158,7 +147,7 @@ export default function Index(props) {
                                                 <IconArrowsDownUp className="size-4" />
                                             </span>
                                         </Button>
-                                    </TableHead>
+                                    </TableHead> */}
                                     <TableHead>
                                         <Button
                                             variant="ghost"
@@ -171,7 +160,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    {/* <TableHead>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -182,7 +171,7 @@ export default function Index(props) {
                                                 <IconArrowsDownUp className="size-4" />
                                             </span>
                                         </Button>
-                                    </TableHead>
+                                    </TableHead> */}
                                     {/* <TableHead>
                                         <Button
                                             variant="ghost"
@@ -209,12 +198,12 @@ export default function Index(props) {
                                             </Avatar> */}
                                             <span>{student.user.name}</span>
                                         </TableCell>
-                                        <TableCell>{student.user.email}</TableCell>
+                                        <TableCell className="text-center">{student.user.email}</TableCell>
                                         <TableCell>{student.classroom?.name}</TableCell>
                                         {/* <TableCell>{student.feeGroup?.group}</TableCell> */}
-                                        <TableCell>{student.student_number}</TableCell>
+                                        {/* <TableCell>{student.student_number}</TableCell> */}
                                         <TableCell className="text-center">{student.semester}</TableCell>
-                                        <TableCell className="text-center">{student.batch}</TableCell>
+                                        {/* <TableCell className="text-center">{student.batch}</TableCell> */}
                                         {/* <TableCell>{formatDateIndo(student.created_at)}</TableCell> */}
                                         <TableCell>
                                             <div className="flex items-center gap-x-1">
@@ -228,17 +217,17 @@ export default function Index(props) {
                                                         <IconMoneybag className="size-4" />
                                                     </Link>
                                                 </Button> */}
-                                                <Button variant="yellow" size="sm" asChild>
+                                                {/* <Button variant="yellow" size="sm" asChild>
                                                     <Link href={route('operators.study-results.index', [student])}>
                                                         <IconSchool className="size-4" />
                                                     </Link>
-                                                </Button>
-                                                <Button variant="blue" size="sm" asChild>
+                                                </Button> */}
+                                                {/* <Button variant="blue" size="sm" asChild>
                                                     <Link href={route('operators.students.edit', [student])}>
                                                         <IconPencil className="size-4" />
                                                     </Link>
-                                                </Button>
-                                                <AlertAction
+                                                </Button> */}
+                                                {/* <AlertAction
                                                     trigger={
                                                         <Button variant="red" size="sm">
                                                             <IconTrash className="size-4" />
@@ -247,7 +236,7 @@ export default function Index(props) {
                                                     action={() =>
                                                         deleteAction(route('operators.students.destroy', [student]))
                                                     }
-                                                />
+                                                /> */}
                                             </div>
                                         </TableCell>
                                     </TableRow>
