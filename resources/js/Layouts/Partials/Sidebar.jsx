@@ -171,12 +171,12 @@ export default function Sidebar({ auth, url }) {
                             title="Mahasiswa"
                             icon={IconUsers}
                         />
-                        <NavLink
+                        {/* <NavLink
                             url={route('operators.teachers.index')}
                             active={url.startsWith('/operators/teachers')}
                             title="Dosen"
                             icon={IconUsersGroup}
-                        />
+                        /> */}
 
                         <div className="px-3 py-2 text-xs font-medium text-white">Manajemen KRS</div>
                         <NavLink
