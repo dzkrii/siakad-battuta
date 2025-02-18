@@ -58,7 +58,7 @@ class StudentOperatorRequest extends FormRequest
                 'max:2048',
             ],
             'fee_group_id' => [
-                'required',
+                'nullable',
                 'exists:fee_groups,id',
             ],
             'classroom_id' => [
