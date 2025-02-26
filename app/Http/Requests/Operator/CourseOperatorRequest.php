@@ -23,12 +23,12 @@ class CourseOperatorRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'code' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('courses')->ignore($this->course?->code),
-            ],
+            // 'code' => [
+            //     'required',
+            //     'string',
+            //     'max:255',
+            //     Rule::unique('courses')->ignore($this->course?->code),
+            // ],
             'teacher_id' => [
                 'required',
                 'exists:teachers,id',
@@ -52,7 +52,7 @@ class CourseOperatorRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'code' => 'Kode',
+            'kode_matkul' => 'Kode',
             'teacher_id' => 'Dosen',
             'name' => 'Nama',
             'credit' => 'SKS',

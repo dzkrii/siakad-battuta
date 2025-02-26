@@ -18,7 +18,7 @@ class CourseOperatorController extends Controller
     public function index(): Response
     {
         $courses = Course::query()
-            ->select(['courses.id', 'courses.faculty_id', 'courses.department_id', 'courses.teacher_id', 'courses.academic_year_id', 'courses.code', 'courses.name', 'courses.credit', 'courses.semester', 'courses.created_at'])
+            ->select(['courses.id', 'courses.faculty_id', 'courses.department_id', 'courses.teacher_id', 'courses.academic_year_id', 'courses.kode_matkul', 'courses.name', 'courses.credit', 'courses.semester', 'courses.created_at'])
             ->filter(request()->only(['search']))
             ->sorting(request()->only(['field', 'direction']))
             ->where('courses.faculty_id', auth()->user()->operator->faculty_id)
