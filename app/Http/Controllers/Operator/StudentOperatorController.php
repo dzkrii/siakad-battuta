@@ -31,18 +31,18 @@ class StudentOperatorController extends Controller
             ->whereHas('user', function ($query) {
                 $query->whereHas('roles', fn($query) => $query->where('name', 'Student'));
             })
-            // ->where('students.faculty_id', auth()->user()->operator->faculty_id)
-            // ->where('students.department_id', auth()->user()->operator->department_id)
+            ->where('students.faculty_id', auth()->user()->operator->faculty_id)
+            ->where('students.department_id', auth()->user()->operator->department_id)
             ->with(['user', 'classroom', 'feeGroup'])
             ->paginate(request()->load ?? 10);
 
-        // $faculty_name = auth()->user()->operator->faculty?->name;
-        // $department_name = auth()->user()->operator->department?->name;
+        $faculty_name = auth()->user()->operator->faculty?->name;
+        $department_name = auth()->user()->operator->department?->name;
 
         return inertia('Operators/Students/Index', [
             'page_settings' => [
                 'title' => 'Mahasiswa',
-                'subtitle' => "Menampilkan semua data mahasiswa yang ada di Universitas Battuta.",
+                'subtitle' => "Menampilkan semua data mahasiswa yang ada di {$faculty_name}, Program Studi {$department_name}.",
             ],
             'students' => StudentOperatorResource::collection($students)->additional([
                 'meta' => [

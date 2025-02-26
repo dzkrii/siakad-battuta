@@ -28,9 +28,9 @@ Route::prefix('operators')->middleware(['auth', 'role:Operator'])->group(functio
         Route::get('teachers', 'index')->name('operators.teachers.index');
         Route::get('teachers/create', 'create')->name('operators.teachers.create');
         Route::post('teachers/create', 'store')->name('operators.teachers.store');
-        Route::get('teachers/edit/{teacher:teacher_number}', 'edit')->name('operators.teachers.edit');
-        Route::put('teachers/edit/{teacher:teacher_number}', 'update')->name('operators.teachers.update');
-        Route::delete('teachers/destroy/{teacher:teacher_number}', 'destroy')->name('operators.teachers.destroy');
+        Route::get('teachers/edit/{teacher}', 'edit')->name('operators.teachers.edit');
+        Route::put('teachers/edit/{teacher}', 'update')->name('operators.teachers.update');
+        Route::delete('teachers/destroy/{teacher}', 'destroy')->name('operators.teachers.destroy');
     });
 
     Route::controller(ClassroomOperatorController::class)->middleware(['checkActiveAcademicYear'])->group(function () {
