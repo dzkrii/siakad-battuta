@@ -381,6 +381,8 @@ export default function Index(props) {
                                                 <IconCheck />
                                                 Simpan
                                             </Button>
+                                        </TableCell>
+                                        <TableCell>
                                             <Button
                                                 variant="blue"
                                                 type="button"
