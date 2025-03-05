@@ -110,7 +110,7 @@ export default function Login({ status, canResetPassword }) {
                 </div>
             </div>
             <div className="hidden bg-muted lg:block">
-                <img src="/images/gedung-baru-battuta-2.jpg" alt="login" className="object-fit w-full" />
+                <img src="/images/gedung-baru-battuta-3.jpg" alt="login" className="object-fit w-full" />
             </div>
             <WhatsAppHelpdesk />
         </div>
