@@ -2,7 +2,6 @@ import EmptyState from '@/Components/EmptyState';
 import HeaderTitle from '@/Components/HeaderTitle';
 import ShowFilter from '@/Components/ShowFilter';
 import { Alert, AlertDescription } from '@/Components/ui/alert';
-import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent, CardHeader } from '@/Components/ui/card';
 import { Checkbox } from '@/Components/ui/checkbox';
@@ -12,7 +11,7 @@ import UseFilter from '@/hooks/UseFilter.';
 import AppLayout from '@/Layouts/AppLayout';
 import { flashMessage } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
-import { IconCheck, IconDoor, IconRefresh, IconUsers } from '@tabler/icons-react';
+import { IconCalculator, IconCheck, IconDoor, IconFileUpload, IconRefresh, IconUsers } from '@tabler/icons-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -113,6 +112,20 @@ export default function Index(props) {
                     subtitle={props.page_settings.subtitle}
                     icon={IconDoor}
                 />
+
+                <Button
+                    variant="blue"
+                    onClick={() =>
+                        (window.location.href = route('teachers.classrooms.import.index', [
+                            props.course.id,
+                            props.classroom.id,
+                        ]))
+                    }
+                    className="flex items-center gap-2"
+                >
+                    <IconFileUpload className="size-4" />
+                    Import Excel
+                </Button>
             </div>
             <Card>
                 <CardHeader className="mb-4 p-0">
@@ -164,66 +177,74 @@ export default function Index(props) {
                             <Table className="w-full border">
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead rowSpan="2">#</TableHead>
-                                        <TableHead rowSpan="2">Nama</TableHead>
-                                        <TableHead rowSpan="2">NIM</TableHead>
-                                        <TableHead colSpan="16" className="border">
+                                        <TableHead rowSpan="2" className="border text-center">
+                                            #
+                                        </TableHead>
+                                        <TableHead rowSpan="2" className="border text-center">
+                                            Nama
+                                        </TableHead>
+                                        <TableHead rowSpan="2" className="border text-center">
+                                            NIM
+                                        </TableHead>
+                                        <TableHead colSpan="16" className="border text-center">
                                             Absensi
                                         </TableHead>
-                                        <TableHead rowSpan="2" className="border">
+                                        <TableHead rowSpan="2" className="border text-center">
                                             Tugas
                                         </TableHead>
-                                        <TableHead rowSpan="2" className="border">
+                                        <TableHead rowSpan="2" className="border text-center">
                                             UTS
                                         </TableHead>
-                                        <TableHead rowSpan="2" className="border">
+                                        <TableHead rowSpan="2" className="border text-center">
                                             UAS
                                         </TableHead>
-                                        <TableHead colSpan="4" className="border">
+                                        <TableHead colSpan="4" className="border text-center">
                                             Total
                                         </TableHead>
-                                        <TableHead colSpan="4" className="border">
+                                        <TableHead colSpan="4" className="border text-center">
                                             Persentase Nilai
                                         </TableHead>
-                                        <TableHead rowSpan="2" className="border">
+                                        <TableHead rowSpan="2" className="border text-center">
                                             Nilai Akhir
                                         </TableHead>
-                                        <TableHead rowSpan="2" className="border">
+                                        <TableHead rowSpan="2" className="border text-center">
                                             Huruf Mutu
                                         </TableHead>
                                     </TableRow>
-                                    <TableRow className="border">
+                                    <TableRow className="border text-center">
                                         {Array.from({ length: 16 }).map((_, i) => (
-                                            <TableHead key={i} className="border">
+                                            <TableHead key={i} className="border text-center">
                                                 {i + 1}
                                             </TableHead>
                                         ))}
-                                        <TableHead className="border">Absen</TableHead>
-                                        <TableHead className="border">Tugas</TableHead>
-                                        <TableHead className="border">UTS</TableHead>
-                                        <TableHead className="border">UAS</TableHead>
-                                        <TableHead className="border">Absen (10%)</TableHead>
-                                        <TableHead className="border">Tugas (50%)</TableHead>
-                                        <TableHead className="border">UTS (15%)</TableHead>
-                                        <TableHead className="border">UAS (25%)</TableHead>
+                                        <TableHead className="border text-center">Absen</TableHead>
+                                        <TableHead className="border text-center">Tugas</TableHead>
+                                        <TableHead className="border text-center">UTS</TableHead>
+                                        <TableHead className="border text-center">UAS</TableHead>
+                                        <TableHead className="border text-center">Absen (10%)</TableHead>
+                                        <TableHead className="border text-center">Tugas (50%)</TableHead>
+                                        <TableHead className="border text-center">UTS (15%)</TableHead>
+                                        <TableHead className="border text-center">UAS (25%)</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {students.map((student, index) => (
                                         <TableRow key={index}>
-                                            <TableCell>{index + 1}</TableCell>
-                                            <TableCell>
+                                            <TableCell className="border text-center">{index + 1}</TableCell>
+                                            <TableCell className="border">
                                                 <div className="flex items-center gap-2">
-                                                    <Avatar>
+                                                    {/* <Avatar>
                                                         <AvatarImage src={student.user.avatar} />
                                                         <AvatarFallback>
                                                             {student.user.name.substring(0, 1)}
                                                         </AvatarFallback>
-                                                    </Avatar>
+                                                    </Avatar> */}
                                                     <span>{student.user.name}</span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{student.student_number}</TableCell>
+                                            <TableCell className="border text-center">
+                                                {student.student_number}
+                                            </TableCell>
                                             {/* Array Absensi */}
                                             {Array.from({ length: 16 }).map((_, section) => {
                                                 const attendance = getAttendanceStudent(
@@ -232,9 +253,9 @@ export default function Index(props) {
                                                     section + 1,
                                                 );
                                                 return (
-                                                    <TableCell key={section}>
+                                                    <TableCell key={section} className="border">
                                                         {attendance ? (
-                                                            <IconCheck className="size-4 text-green-500" />
+                                                            <IconCheck className="size-3 text-green-500" />
                                                         ) : (
                                                             <Checkbox
                                                                 id={`attendances_${student.id}_section_${section + 1}`}
@@ -260,7 +281,7 @@ export default function Index(props) {
                                             })}
 
                                             {/* Array Tugas */}
-                                            <TableCell>
+                                            <TableCell className="border text-center">
                                                 {getGradeStudent(student.id, student.grades, 'tugas', null) ? (
                                                     getGradeStudent(student.id, student.grades, 'tugas', null).grade
                                                 ) : (
@@ -282,7 +303,7 @@ export default function Index(props) {
                                             </TableCell>
 
                                             {/* UTS */}
-                                            <TableCell>
+                                            <TableCell className="border text-center">
                                                 {getGradeStudent(student.id, student.grades, 'uts', null) ? (
                                                     getGradeStudent(student.id, student.grades, 'uts', null).grade
                                                 ) : (
@@ -304,7 +325,7 @@ export default function Index(props) {
                                             </TableCell>
 
                                             {/* UAS */}
-                                            <TableCell>
+                                            <TableCell className="border text-center">
                                                 {getGradeStudent(student.id, student.grades, 'uas', null) ? (
                                                     getGradeStudent(student.id, student.grades, 'uas', null).grade
                                                 ) : (
@@ -324,25 +345,68 @@ export default function Index(props) {
                                                     />
                                                 )}
                                             </TableCell>
-                                            <TableCell>{student.total.attendances_count}</TableCell>
-                                            <TableCell>{student.total.tasks_count}</TableCell>
-                                            <TableCell>{student.total.uts_count}</TableCell>
-                                            <TableCell>{student.total.uas_count}</TableCell>
-                                            <TableCell>{student.percentage.attendance_percentage}</TableCell>
-                                            <TableCell>{student.percentage.task_percentage}</TableCell>
-                                            <TableCell>{student.percentage.uts_percentage}</TableCell>
-                                            <TableCell>{student.percentage.uas_percentage}</TableCell>
-                                            <TableCell>{student.final_score}</TableCell>
-                                            <TableCell>{student.letter}</TableCell>
+                                            <TableCell className="border text-center">
+                                                {student.total.attendances_count}
+                                            </TableCell>
+                                            <TableCell className="border text-center">
+                                                {student.total.tasks_count}
+                                            </TableCell>
+                                            <TableCell className="border text-center">
+                                                {student.total.uts_count}
+                                            </TableCell>
+                                            <TableCell className="border text-center">
+                                                {student.total.uas_count}
+                                            </TableCell>
+                                            <TableCell className="border text-center">
+                                                {student.percentage.attendance_percentage}
+                                            </TableCell>
+                                            <TableCell className="border text-center">
+                                                {student.percentage.task_percentage}
+                                            </TableCell>
+                                            <TableCell className="border text-center">
+                                                {student.percentage.uts_percentage}
+                                            </TableCell>
+                                            <TableCell className="border text-center">
+                                                {student.percentage.uas_percentage}
+                                            </TableCell>
+                                            <TableCell className="border text-center">{student.final_score}</TableCell>
+                                            <TableCell className="border text-center">{student.letter}</TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                                 <TableFooter>
                                     <TableRow>
-                                        <TableCell colSpan="45">
+                                        <TableCell colSpan="45" className="flex gap-2">
                                             <Button variant="orange" type="submit" size="lg" disabled={processing}>
                                                 <IconCheck />
                                                 Simpan
+                                            </Button>
+                                            <Button
+                                                variant="blue"
+                                                type="button"
+                                                size="lg"
+                                                onClick={() => {
+                                                    console.log('Tombol Hitung Nilai Akhir diklik');
+                                                    console.log(
+                                                        'URL:',
+                                                        route('teachers.classrooms.calculate', [
+                                                            props.course.id,
+                                                            props.classroom.id,
+                                                        ]),
+                                                    );
+
+                                                    if (
+                                                        confirm('Apakah Anda yakin ingin menghitung semua nilai akhir?')
+                                                    ) {
+                                                        window.location.href = route('teachers.classrooms.calculate', [
+                                                            props.course.id,
+                                                            props.classroom.id,
+                                                        ]);
+                                                    }
+                                                }}
+                                            >
+                                                <IconCalculator className="mr-2" />
+                                                Hitung Nilai Akhir
                                             </Button>
                                         </TableCell>
                                     </TableRow>

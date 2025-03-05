@@ -19,25 +19,25 @@ export default function Grades({ studyResult, grades, name = null }) {
                 <Table className="w-full border">
                     <TableHeader>
                         <TableRow>
-                            <TableHead className="border">NO</TableHead>
-                            <TableHead className="border">KODE</TableHead>
-                            <TableHead className="border">MATAKULIAH</TableHead>
-                            <TableHead className="border">SKS</TableHead>
-                            <TableHead className="border">HURUF MUTU</TableHead>
-                            <TableHead className="border">BOBOT</TableHead>
-                            <TableHead className="border">NILAI</TableHead>
+                            <TableHead className="border text-center">NO</TableHead>
+                            <TableHead className="border text-center">KODE</TableHead>
+                            <TableHead className="border text-center">MATAKULIAH</TableHead>
+                            <TableHead className="border text-center">SKS</TableHead>
+                            <TableHead className="border text-center">HURUF MUTU</TableHead>
+                            <TableHead className="border text-center">BOBOT</TableHead>
+                            <TableHead className="border text-center">NILAI</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {grades.map((grade, index) => (
                             <TableRow key={index}>
-                                <TableCell className="border">{index + 1}</TableCell>
-                                <TableCell className="border">{grade.course.kode_matkul}</TableCell>
+                                <TableCell className="border text-center">{index + 1}</TableCell>
+                                <TableCell className="border text-center">{grade.course.kode_matkul}</TableCell>
                                 <TableCell className="border">{grade.course.name}</TableCell>
-                                <TableCell className="border">{grade.course.credit}</TableCell>
-                                <TableCell className="border">{grade.letter}</TableCell>
-                                <TableCell className="border">{grade.weight_of_value}</TableCell>
-                                <TableCell className="border">{grade.grade}</TableCell>
+                                <TableCell className="border text-center">{grade.course.credit}</TableCell>
+                                <TableCell className="border text-center">{grade.letter}</TableCell>
+                                <TableCell className="border text-center">{grade.weight_of_value}</TableCell>
+                                <TableCell className="border text-center">{grade.grade}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

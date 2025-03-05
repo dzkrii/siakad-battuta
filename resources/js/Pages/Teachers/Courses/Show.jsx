@@ -1,9 +1,10 @@
 import EmptyState from '@/Components/EmptyState';
 import HeaderTitle from '@/Components/HeaderTitle';
+import { Button } from '@/Components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/Components/ui/card';
 import AppLayout from '@/Layouts/AppLayout';
 import { Link } from '@inertiajs/react';
-import { IconDoor } from '@tabler/icons-react';
+import { IconArrowBack, IconDoor } from '@tabler/icons-react';
 
 export default function Show(props) {
     return (
@@ -14,6 +15,12 @@ export default function Show(props) {
                     subtitle={props.page_settings.subtitle}
                     icon={IconDoor}
                 />
+                <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
+                    <Link href={route('teachers.courses.index')}>
+                        <IconArrowBack className="size-4" />
+                        Kembali
+                    </Link>
+                </Button>
             </div>
             <Card>
                 <CardHeader>

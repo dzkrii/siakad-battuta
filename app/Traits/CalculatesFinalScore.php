@@ -76,4 +76,15 @@ trait CalculatesFinalScore
 
         return $gradePoints[$letterGrade] ?? 0.00;
     }
+
+    public function convertScoreToGPA($score)
+    {
+        if ($score >= 80) return 4.00;
+        if ($score >= 75) return 3.50;
+        if ($score >= 71) return 3.00;
+        if ($score >= 56) return 2.50;
+        if ($score >= 51) return 2.00;
+        if ($score >= 40) return 1.50;
+        return 0.00;
+    }
 }
