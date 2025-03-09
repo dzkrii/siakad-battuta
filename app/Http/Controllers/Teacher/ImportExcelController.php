@@ -18,6 +18,10 @@ use App\Imports\AttendancesImport;
 use App\Exports\GradeTemplateExport;
 use App\Exports\AttendanceTemplateExport;
 use App\Imports\MultipleGradesImport;
+use App\Imports\CourseSchedulesGradesImport;
+use App\Exports\CourseSchedulesTemplateExport;
+use App\Imports\CourseSchedulesAttendancesImport;
+use App\Exports\CourseSchedulesAttendanceTemplateExport;
 use Illuminate\Support\Facades\Log;
 
 class ImportExcelController extends Controller
@@ -36,6 +40,7 @@ class ImportExcelController extends Controller
         ]);
     }
 
+    // Template Nilai
     public function downloadGradeTemplate(Course $course, Classroom $classroom)
     {
         $filename = 'template_nilai_' . $course->name . '_' . $classroom->name . '.xlsx';
@@ -46,6 +51,17 @@ class ImportExcelController extends Controller
         );
     }
 
+    public function downloadCourseSchedulesTemplate(Course $course)
+    {
+        $filename = 'template_nilai_semua_jadwal_' . $course->name . '.xlsx';
+
+        return Excel::download(
+            new CourseSchedulesTemplateExport($course->id),
+            $filename
+        );
+    }
+
+    // Template Absensi
     public function downloadAttendanceTemplate(Course $course, Classroom $classroom)
     {
         $filename = 'template_absensi_' . $course->name . '_' . $classroom->name . '.xlsx';
@@ -56,6 +72,17 @@ class ImportExcelController extends Controller
         );
     }
 
+    public function downloadCourseSchedulesAttendanceTemplate(Course $course)
+    {
+        $filename = 'template_absensi_semua_jadwal_' . $course->name . '.xlsx';
+
+        return Excel::download(
+            new CourseSchedulesAttendanceTemplateExport($course->id),
+            $filename
+        );
+    }
+
+    // Import Nilai
     public function importGrades(Course $course, Classroom $classroom, Request $request)
     {
         $request->validate([
@@ -84,6 +111,37 @@ class ImportExcelController extends Controller
         }
     }
 
+    public function importCourseSchedulesGrades(Course $course, Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls'
+        ]);
+
+        try {
+            Log::info('Starting course schedules grades import');
+
+            $import = new CourseSchedulesGradesImport($course->id);
+            Excel::import($import, $request->file('file'));
+
+            $results = $import->getImportResults();
+            Log::info('Course schedules import results', $results);
+
+            $successMessage = "Import berhasil: {$results['success']} nilai baru, {$results['updated']} nilai diperbarui";
+            if ($results['skipped'] > 0 || $results['error'] > 0) {
+                $successMessage .= ", {$results['skipped']} dilewati, {$results['error']} error";
+            }
+
+            flashMessage($successMessage);
+            return back();
+        } catch (\Throwable $e) {
+            Log::error('Import Course Schedules Grades Error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            flashMessage('Terjadi kesalahan: ' . $e->getMessage(), 'error');
+            return back();
+        }
+    }
+
+    // Import Absensi
     public function importAttendances(Course $course, Classroom $classroom, Request $request)
     {
         $request->validate([
@@ -105,6 +163,36 @@ class ImportExcelController extends Controller
         } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Import Attendance Error: ' . $e->getMessage());
+            flashMessage('Terjadi kesalahan: ' . $e->getMessage(), 'error');
+            return back();
+        }
+    }
+
+    public function importCourseSchedulesAttendances(Course $course, Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls'
+        ]);
+
+        try {
+            Log::info('Starting course schedules attendances import');
+
+            $import = new CourseSchedulesAttendancesImport($course->id);
+            Excel::import($import, $request->file('file'));
+
+            $results = $import->getImportResults();
+            Log::info('Course schedules attendances import results', $results);
+
+            $successMessage = "Import absensi berhasil: {$results['success']} absensi baru";
+            if ($results['skipped'] > 0 || $results['error'] > 0) {
+                $successMessage .= ", {$results['skipped']} dilewati, {$results['error']} error";
+            }
+
+            flashMessage($successMessage);
+            return back();
+        } catch (\Throwable $e) {
+            Log::error('Import Course Schedules Attendances Error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
             flashMessage('Terjadi kesalahan: ' . $e->getMessage(), 'error');
             return back();
         }

@@ -11,9 +11,9 @@ import { toast } from 'sonner';
 
 export default function ImportExcel({ page_settings, course, classroom }) {
     const [activeTab, setActiveTab] = useState('nilai');
-    const [selectedCategory, setSelectedCategory] = useState('tugas');
+    const [importMode, setImportMode] = useState('single'); // 'single' atau 'all_schedules'
 
-    // Form untuk import nilai
+    // Form untuk import nilai (single classroom)
     const {
         data: gradeData,
         setData: setGradeData,
@@ -22,11 +22,22 @@ export default function ImportExcel({ page_settings, course, classroom }) {
         errors: gradeErrors,
         reset: gradeReset,
     } = useForm({
-        category: 'tugas',
         file: null,
     });
 
-    // Form untuk import absensi
+    // Form untuk import nilai semua jadwal
+    const {
+        data: schedulesData,
+        setData: setSchedulesData,
+        post: postSchedules,
+        processing: schedulesProcessing,
+        errors: schedulesErrors,
+        reset: schedulesReset,
+    } = useForm({
+        file: null,
+    });
+
+    // Form untuk import absensi (single classroom)
     const {
         data: attendanceData,
         setData: setAttendanceData,
@@ -38,21 +49,39 @@ export default function ImportExcel({ page_settings, course, classroom }) {
         file: null,
     });
 
-    // Download template nilai
+    // Form untuk import absensi semua jadwal
+    const {
+        data: attendanceSchedulesData,
+        setData: setAttendanceSchedulesData,
+        post: postAttendanceSchedules,
+        processing: attendanceSchedulesProcessing,
+        errors: attendanceSchedulesErrors,
+        reset: attendanceSchedulesReset,
+    } = useForm({
+        file: null,
+    });
+
+    // Download template nilai (single classroom)
     const handleDownloadGradeTemplate = () => {
-        window.location.href = route('teachers.classrooms.template.grade', [
-            course.id,
-            classroom.id,
-            { category: selectedCategory },
-        ]);
+        window.location.href = route('teachers.classrooms.template.grade', [course.id, classroom.id]);
     };
 
-    // Download template absensi
+    // Download template nilai semua jadwal
+    const handleDownloadSchedulesTemplate = () => {
+        window.location.href = route('teachers.courses.template.schedules', [course.id]);
+    };
+
+    // Download template absensi (single classroom)
     const handleDownloadAttendanceTemplate = () => {
         window.location.href = route('teachers.classrooms.template.attendance', [course.id, classroom.id]);
     };
 
-    // Handle submit form nilai
+    // Download template absensi semua jadwal
+    const handleDownloadAttendanceSchedulesTemplate = () => {
+        window.location.href = route('teachers.courses.template.attendance-schedules', [course.id]);
+    };
+
+    // Handle submit form nilai (single classroom)
     const handleGradeSubmit = (e) => {
         e.preventDefault();
 
@@ -69,7 +98,24 @@ export default function ImportExcel({ page_settings, course, classroom }) {
         });
     };
 
-    // Handle submit form absensi
+    // Handle submit form nilai semua jadwal
+    const handleSchedulesSubmit = (e) => {
+        e.preventDefault();
+
+        postSchedules(route('teachers.courses.import.schedules', [course.id]), {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Nilai untuk semua jadwal berhasil diimport');
+                schedulesReset();
+            },
+            onError: (errors) => {
+                toast.error('Terjadi kesalahan saat import nilai untuk semua jadwal');
+                console.error(errors);
+            },
+        });
+    };
+
+    // Handle submit form absensi (single classroom)
     const handleAttendanceSubmit = (e) => {
         e.preventDefault();
 
@@ -81,6 +127,23 @@ export default function ImportExcel({ page_settings, course, classroom }) {
             },
             onError: (errors) => {
                 toast.error('Terjadi kesalahan saat import absensi');
+                console.error(errors);
+            },
+        });
+    };
+
+    // Handle submit form absensi semua jadwal
+    const handleAttendanceSchedulesSubmit = (e) => {
+        e.preventDefault();
+
+        postAttendanceSchedules(route('teachers.courses.import.attendance-schedules', [course.id]), {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Absensi untuk semua jadwal berhasil diimport');
+                attendanceSchedulesReset();
+            },
+            onError: (errors) => {
+                toast.error('Terjadi kesalahan saat import absensi untuk semua jadwal');
                 console.error(errors);
             },
         });
@@ -142,131 +205,422 @@ export default function ImportExcel({ page_settings, course, classroom }) {
                         </div>
                     </div>
 
+                    {/* Mode Selector (Shared between both tabs) */}
+                    <div className="mb-4 flex items-center space-x-6 border-b pb-4">
+                        <span className="font-medium">Mode Import:</span>
+                        <div className="flex space-x-4">
+                            <label className="flex items-center space-x-2">
+                                <input
+                                    type="radio"
+                                    name="importMode"
+                                    value="single"
+                                    checked={importMode === 'single'}
+                                    onChange={() => setImportMode('single')}
+                                    className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
+                                />
+                                <span>Per Kelas</span>
+                            </label>
+                            <label className="flex items-center space-x-2">
+                                <input
+                                    type="radio"
+                                    name="importMode"
+                                    value="all_schedules"
+                                    checked={importMode === 'all_schedules'}
+                                    onChange={() => setImportMode('all_schedules')}
+                                    className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
+                                />
+                                <span>Semua Jadwal Mata Kuliah</span>
+                            </label>
+                        </div>
+                    </div>
+
                     {/* Tab Content for Nilai */}
                     {activeTab === 'nilai' && (
                         <div className="flex flex-col space-y-4">
-                            <div className="flex flex-col space-y-2">
-                                <label htmlFor="category" className="text-sm font-medium text-gray-700">
-                                    Jenis Nilai
-                                </label>
-                                <div className="flex items-center space-x-4">
-                                    <Alert variant="info">
+                            {/* Single Classroom Import */}
+                            {importMode === 'single' && (
+                                <div className="space-y-4">
+                                    <div className="flex flex-col space-y-2">
+                                        <label htmlFor="category" className="text-sm font-medium text-gray-700">
+                                            Import Nilai Per Kelas
+                                        </label>
+                                        <div className="flex items-center space-x-4">
+                                            <Alert className="flex-1">
+                                                <AlertDescription>
+                                                    <p>Format Excel berisi kolom:</p>
+                                                    <ul className="mt-2 list-disc pl-6">
+                                                        <li>
+                                                            <strong>student_id</strong>: ID mahasiswa (terisi otomatis)
+                                                        </li>
+                                                        <li>
+                                                            <strong>nim</strong>: Nomor Induk Mahasiswa
+                                                        </li>
+                                                        <li>
+                                                            <strong>name</strong>: Nama mahasiswa
+                                                        </li>
+                                                        <li>
+                                                            <strong>nilai_tugas</strong>: Nilai tugas (0-100)
+                                                        </li>
+                                                        <li>
+                                                            <strong>nilai_uts</strong>: Nilai UTS (0-100)
+                                                        </li>
+                                                        <li>
+                                                            <strong>nilai_uas</strong>: Nilai UAS (0-100)
+                                                        </li>
+                                                    </ul>
+                                                    <p className="mt-2">
+                                                        Anda bisa mengisi satu, dua, atau ketiga nilai sekaligus.
+                                                    </p>
+                                                </AlertDescription>
+                                            </Alert>
+                                            <div>
+                                                <Button
+                                                    variant="blue"
+                                                    className="flex items-center gap-2"
+                                                    onClick={handleDownloadGradeTemplate}
+                                                >
+                                                    <IconDownload className="size-4" />
+                                                    Download Template
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <form onSubmit={handleGradeSubmit} className="space-y-4">
+                                        <div className="flex flex-col space-y-2">
+                                            <label htmlFor="gradeFile" className="text-sm font-medium text-gray-700">
+                                                Upload File Excel
+                                            </label>
+                                            <Input
+                                                id="gradeFile"
+                                                type="file"
+                                                accept=".xlsx,.xls"
+                                                onChange={(e) => setGradeData('file', e.target.files[0])}
+                                            />
+                                            {gradeErrors.file && (
+                                                <p className="text-sm text-red-500">{gradeErrors.file}</p>
+                                            )}
+                                        </div>
+
+                                        <Alert variant="warning">
+                                            <AlertDescription>
+                                                Pastikan format file Excel sesuai dengan template yang disediakan. Data
+                                                yang sudah diimport tidak dapat diubah lagi.
+                                            </AlertDescription>
+                                        </Alert>
+
+                                        <Button
+                                            type="submit"
+                                            disabled={gradeProcessing}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <IconCloudUpload className="size-4" />
+                                            {gradeProcessing ? 'Sedang Memproses...' : 'Import Nilai'}
+                                        </Button>
+                                    </form>
+
+                                    <Alert className="mt-4">
                                         <AlertDescription>
-                                            <p>Format Excel untuk nilai berisi kolom:</p>
-                                            <ul className="mt-2 list-disc pl-6">
-                                                <li>
-                                                    <strong>nilai_tugas</strong>: Nilai tugas (0-100)
-                                                </li>
-                                                <li>
-                                                    <strong>nilai_uts</strong>: Nilai UTS (0-100)
-                                                </li>
-                                                <li>
-                                                    <strong>nilai_uas</strong>: Nilai UAS (0-100)
-                                                </li>
-                                            </ul>
-                                            <p className="mt-2">
-                                                Anda bisa mengisi satu, dua, atau ketiga nilai sekaligus.
-                                            </p>
+                                            <strong className="font-medium">Catatan:</strong> Mode ini mengimpor nilai
+                                            hanya untuk kelas {classroom.name} saja.
                                         </AlertDescription>
                                     </Alert>
-                                    <Button
-                                        variant="blue"
-                                        className="flex items-center gap-2"
-                                        onClick={handleDownloadGradeTemplate}
-                                    >
-                                        <IconDownload className="size-4" />
-                                        Download Template
-                                    </Button>
                                 </div>
-                            </div>
+                            )}
 
-                            <form onSubmit={handleGradeSubmit} className="space-y-4">
-                                <div className="flex flex-col space-y-2">
-                                    <label htmlFor="gradeFile" className="text-sm font-medium text-gray-700">
-                                        Upload File Excel
-                                    </label>
-                                    <Input
-                                        id="gradeFile"
-                                        type="file"
-                                        accept=".xlsx,.xls"
-                                        onChange={(e) => setGradeData('file', e.target.files[0])}
-                                    />
-                                    {gradeErrors.file && <p className="text-sm text-red-500">{gradeErrors.file}</p>}
+                            {/* All Schedules Import */}
+                            {importMode === 'all_schedules' && (
+                                <div className="flex flex-col space-y-4">
+                                    <div className="flex flex-col space-y-2">
+                                        <label className="text-sm font-medium text-gray-700">
+                                            Import Nilai Semua Jadwal Mata Kuliah
+                                        </label>
+                                        <div className="flex items-center space-x-4">
+                                            <Alert>
+                                                <AlertDescription>
+                                                    <p>Format Excel untuk semua jadwal berisi kolom:</p>
+                                                    <ul className="mt-2 list-disc pl-6">
+                                                        <li>
+                                                            <strong>nim</strong>: Nomor Induk Mahasiswa
+                                                        </li>
+                                                        <li>
+                                                            <strong>name</strong>: Nama Mahasiswa
+                                                        </li>
+                                                        <li>
+                                                            <strong>classroom_id</strong>: ID Kelas
+                                                        </li>
+                                                        <li>
+                                                            <strong>classroom_name</strong>: Nama Kelas
+                                                        </li>
+                                                        <li>
+                                                            <strong>jadwal</strong>: Informasi jadwal
+                                                        </li>
+                                                        <li>
+                                                            <strong>nilai_tugas</strong>: Nilai tugas (0-100)
+                                                        </li>
+                                                        <li>
+                                                            <strong>nilai_uts</strong>: Nilai UTS (0-100)
+                                                        </li>
+                                                        <li>
+                                                            <strong>nilai_uas</strong>: Nilai UAS (0-100)
+                                                        </li>
+                                                    </ul>
+                                                    <p className="mt-2">
+                                                        Template berisi semua mahasiswa dari semua kelas yang terkait
+                                                        dengan mata kuliah ini.
+                                                    </p>
+                                                </AlertDescription>
+                                            </Alert>
+                                            <div>
+                                                <Button
+                                                    variant="blue"
+                                                    className="flex items-center gap-2"
+                                                    onClick={handleDownloadSchedulesTemplate}
+                                                >
+                                                    <IconDownload className="size-4" />
+                                                    Download Template
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <form onSubmit={handleSchedulesSubmit} className="space-y-4">
+                                        <div className="flex flex-col space-y-2">
+                                            <label
+                                                htmlFor="schedulesFile"
+                                                className="text-sm font-medium text-gray-700"
+                                            >
+                                                Upload File Excel
+                                            </label>
+                                            <Input
+                                                id="schedulesFile"
+                                                type="file"
+                                                accept=".xlsx,.xls"
+                                                onChange={(e) => setSchedulesData('file', e.target.files[0])}
+                                            />
+                                            {schedulesErrors.file && (
+                                                <p className="text-sm text-red-500">{schedulesErrors.file}</p>
+                                            )}
+                                        </div>
+
+                                        <Alert variant="warning">
+                                            <AlertDescription>
+                                                <p>Petunjuk penggunaan:</p>
+                                                <ul className="mt-2 list-disc pl-6">
+                                                    <li>Anda dapat mengisi nilai untuk semua kelas sekaligus</li>
+                                                    <li>Kolom yang kosong akan diabaikan</li>
+                                                    <li>Nilai yang sudah ada akan diperbarui</li>
+                                                    <li>
+                                                        <strong>Jangan mengubah</strong> kolom nim, name, classroom_id,
+                                                        classroom_name, dan jadwal
+                                                    </li>
+                                                </ul>
+                                            </AlertDescription>
+                                        </Alert>
+
+                                        <Button
+                                            type="submit"
+                                            disabled={schedulesProcessing}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <IconCloudUpload className="size-4" />
+                                            {schedulesProcessing ? 'Sedang Memproses...' : 'Import Nilai Semua Jadwal'}
+                                        </Button>
+                                    </form>
+
+                                    <Alert className="mt-4 bg-green-50 text-green-800">
+                                        <AlertDescription>
+                                            <strong className="font-medium">🔥 Fitur Baru:</strong> Mode ini
+                                            memungkinkan Anda mengimpor nilai untuk{' '}
+                                            <strong>semua jadwal mata kuliah {course.name} sekaligus</strong>, meskipun
+                                            diampu oleh beberapa dosen!
+                                        </AlertDescription>
+                                    </Alert>
                                 </div>
-
-                                <Alert variant="warning">
-                                    <AlertDescription>
-                                        Pastikan format file Excel sesuai dengan template yang disediakan. Data yang
-                                        sudah diimport tidak dapat diubah lagi.
-                                    </AlertDescription>
-                                </Alert>
-
-                                <Button type="submit" disabled={gradeProcessing} className="flex items-center gap-2">
-                                    <IconCloudUpload className="size-4" />
-                                    {gradeProcessing ? 'Sedang Memproses...' : 'Import Nilai'}
-                                </Button>
-                            </form>
+                            )}
                         </div>
                     )}
 
                     {/* Tab Content for Absensi */}
                     {activeTab === 'absensi' && (
                         <div className="flex flex-col space-y-4">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-semibold">Import Data Absensi</h3>
-                                <Button
-                                    variant="blue"
-                                    className="flex items-center gap-2"
-                                    onClick={handleDownloadAttendanceTemplate}
-                                >
-                                    <IconDownload className="size-4" />
-                                    Download Template
-                                </Button>
-                            </div>
+                            {/* Single Classroom Attendance Import */}
+                            {importMode === 'single' && (
+                                <div className="flex flex-col space-y-4">
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-lg font-semibold">Import Absensi Per Kelas</h3>
+                                        <Button
+                                            variant="blue"
+                                            className="flex items-center gap-2"
+                                            onClick={handleDownloadAttendanceTemplate}
+                                        >
+                                            <IconDownload className="size-4" />
+                                            Download Template
+                                        </Button>
+                                    </div>
 
-                            <form onSubmit={handleAttendanceSubmit} className="space-y-4">
-                                <div className="flex flex-col space-y-2">
-                                    <label htmlFor="attendanceFile" className="text-sm font-medium text-gray-700">
-                                        Upload File Excel
-                                    </label>
-                                    <Input
-                                        id="attendanceFile"
-                                        type="file"
-                                        accept=".xlsx,.xls"
-                                        onChange={(e) => setAttendanceData('file', e.target.files[0])}
-                                    />
-                                    {attendanceErrors.file && (
-                                        <p className="text-sm text-red-500">{attendanceErrors.file}</p>
-                                    )}
+                                    <form onSubmit={handleAttendanceSubmit} className="space-y-4">
+                                        <div className="flex flex-col space-y-2">
+                                            <label
+                                                htmlFor="attendanceFile"
+                                                className="text-sm font-medium text-gray-700"
+                                            >
+                                                Upload File Excel
+                                            </label>
+                                            <Input
+                                                id="attendanceFile"
+                                                type="file"
+                                                accept=".xlsx,.xls"
+                                                onChange={(e) => setAttendanceData('file', e.target.files[0])}
+                                            />
+                                            {attendanceErrors.file && (
+                                                <p className="text-sm text-red-500">{attendanceErrors.file}</p>
+                                            )}
+                                        </div>
+
+                                        <Alert variant="warning">
+                                            <AlertDescription>
+                                                <p>Petunjuk pengisian absensi:</p>
+                                                <ul className="mt-2 list-disc pl-6">
+                                                    <li>Isi dengan angka 1 untuk kehadiran (Hadir)</li>
+                                                    <li>Biarkan kosong atau isi 0 untuk ketidakhadiran</li>
+                                                    <li>Data yang sudah diimport tidak dapat diubah</li>
+                                                </ul>
+                                            </AlertDescription>
+                                        </Alert>
+
+                                        <Button
+                                            type="submit"
+                                            disabled={attendanceProcessing}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <IconCloudUpload className="size-4" />
+                                            {attendanceProcessing ? 'Sedang Memproses...' : 'Import Absensi'}
+                                        </Button>
+                                    </form>
+
+                                    <Alert className="mt-4">
+                                        <AlertDescription>
+                                            <strong className="font-medium">Catatan:</strong> Mode ini mengimpor absensi
+                                            hanya untuk kelas {classroom.name} saja.
+                                        </AlertDescription>
+                                    </Alert>
                                 </div>
+                            )}
 
-                                <Alert variant="warning">
-                                    <AlertDescription>
-                                        <p>Petunjuk pengisian absensi:</p>
-                                        <ul className="mt-2 list-disc pl-6">
-                                            <li>Isi dengan angka 1 untuk kehadiran (Hadir)</li>
-                                            <li>Biarkan kosong atau isi 0 untuk ketidakhadiran</li>
-                                            <li>Data yang sudah diimport tidak dapat diubah</li>
-                                        </ul>
-                                    </AlertDescription>
-                                </Alert>
+                            {/* All Schedules Attendance Import */}
+                            {importMode === 'all_schedules' && (
+                                <div className="flex flex-col space-y-4">
+                                    <div className="flex flex-col space-y-2">
+                                        <label className="text-sm font-medium text-gray-700">
+                                            Import Absensi Semua Jadwal Mata Kuliah
+                                        </label>
+                                        <div className="flex items-center space-x-4">
+                                            <Alert>
+                                                <AlertDescription>
+                                                    <p>Format Excel untuk absensi semua jadwal berisi kolom:</p>
+                                                    <ul className="mt-2 list-disc pl-6">
+                                                        <li>
+                                                            <strong>nim</strong>: Nomor Induk Mahasiswa
+                                                        </li>
+                                                        <li>
+                                                            <strong>name</strong>: Nama Mahasiswa
+                                                        </li>
+                                                        <li>
+                                                            <strong>classroom_id</strong>: ID Kelas
+                                                        </li>
+                                                        <li>
+                                                            <strong>classroom_name</strong>: Nama Kelas
+                                                        </li>
+                                                        <li>
+                                                            <strong>jadwal</strong>: Informasi jadwal
+                                                        </li>
+                                                        <li>
+                                                            <strong>pertemuan_1</strong> sampai{' '}
+                                                            <strong>pertemuan_16</strong>: Kehadiran per pertemuan
+                                                        </li>
+                                                    </ul>
+                                                    <p className="mt-2">
+                                                        Template berisi semua mahasiswa dari semua kelas yang terkait
+                                                        dengan mata kuliah ini.
+                                                    </p>
+                                                </AlertDescription>
+                                            </Alert>
+                                            <div>
+                                                <Button
+                                                    variant="blue"
+                                                    className="flex items-center gap-2"
+                                                    onClick={handleDownloadAttendanceSchedulesTemplate}
+                                                >
+                                                    <IconDownload className="size-4" />
+                                                    Download Template
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
 
-                                <Button
-                                    type="submit"
-                                    disabled={attendanceProcessing}
-                                    className="flex items-center gap-2"
-                                >
-                                    <IconCloudUpload className="size-4" />
-                                    {attendanceProcessing ? 'Sedang Memproses...' : 'Import Absensi'}
-                                </Button>
-                            </form>
+                                    <form onSubmit={handleAttendanceSchedulesSubmit} className="space-y-4">
+                                        <div className="flex flex-col space-y-2">
+                                            <label
+                                                htmlFor="attendanceSchedulesFile"
+                                                className="text-sm font-medium text-gray-700"
+                                            >
+                                                Upload File Excel
+                                            </label>
+                                            <Input
+                                                id="attendanceSchedulesFile"
+                                                type="file"
+                                                accept=".xlsx,.xls"
+                                                onChange={(e) => setAttendanceSchedulesData('file', e.target.files[0])}
+                                            />
+                                            {attendanceSchedulesErrors.file && (
+                                                <p className="text-sm text-red-500">{attendanceSchedulesErrors.file}</p>
+                                            )}
+                                        </div>
+
+                                        <Alert variant="warning">
+                                            <AlertDescription>
+                                                <p>Petunjuk penggunaan:</p>
+                                                <ul className="mt-2 list-disc pl-6">
+                                                    <li>Isi dengan angka 1 untuk kehadiran (Hadir)</li>
+                                                    <li>Biarkan kosong atau isi 0 untuk ketidakhadiran</li>
+                                                    <li>
+                                                        <strong>Jangan mengubah</strong> kolom nim, name, classroom_id,
+                                                        classroom_name, dan jadwal
+                                                    </li>
+                                                </ul>
+                                            </AlertDescription>
+                                        </Alert>
+
+                                        <Button
+                                            type="submit"
+                                            disabled={attendanceSchedulesProcessing}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <IconCloudUpload className="size-4" />
+                                            {attendanceSchedulesProcessing
+                                                ? 'Sedang Memproses...'
+                                                : 'Import Absensi Semua Jadwal'}
+                                        </Button>
+                                    </form>
+
+                                    <Alert className="mt-4 bg-green-50 text-green-800">
+                                        <AlertDescription>
+                                            <strong className="font-medium">🔥 Fitur Baru:</strong> Mode ini
+                                            memungkinkan Anda mengimpor absensi untuk{' '}
+                                            <strong>semua jadwal mata kuliah {course.name} sekaligus</strong>, meskipun
+                                            diampu oleh beberapa dosen!
+                                        </AlertDescription>
+                                    </Alert>
+                                </div>
+                            )}
                         </div>
                     )}
 
                     <div className="mt-8 border-t pt-6">
                         <h3 className="mb-4 text-lg font-semibold">Petunjuk Penggunaan:</h3>
                         <ol className="list-decimal space-y-2 pl-6">
-                            <li>Download template Excel sesuai jenis data yang akan diimport (Nilai atau Absensi)</li>
+                            <li>Download template Excel sesuai jenis data yang akan diimport</li>
                             <li>Isi data pada template tanpa mengubah struktur kolom yang ada</li>
                             <li>Untuk nilai, pastikan nilainya dalam rentang 0-100</li>
                             <li>Untuk absensi, isi dengan 1 (hadir) atau biarkan kosong/0 (tidak hadir)</li>
