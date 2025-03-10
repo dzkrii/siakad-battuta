@@ -352,16 +352,23 @@ export default function ImportExcel({ page_settings, course, classroom }) {
                                                         <li>
                                                             <strong>classroom_name</strong>: Nama Kelas
                                                         </li>
+                                                        <li className="text-yellow-600">
+                                                            <strong>nama_mata_kuliah</strong>: Nama Mata Kuliah
+                                                        </li>
                                                         <li>
                                                             <strong>jadwal</strong>: Informasi jadwal
                                                         </li>
-                                                        <li>
+                                                        <li className="font-semibold text-green-600">
+                                                            <strong>nilai_absensi</strong>: Jumlah pertemuan yang
+                                                            dihadiri (1-16)
+                                                        </li>
+                                                        <li className="text-blue-600">
                                                             <strong>nilai_tugas</strong>: Nilai tugas (0-100)
                                                         </li>
-                                                        <li>
+                                                        <li className="text-blue-600">
                                                             <strong>nilai_uts</strong>: Nilai UTS (0-100)
                                                         </li>
-                                                        <li>
+                                                        <li className="text-blue-600">
                                                             <strong>nilai_uas</strong>: Nilai UAS (0-100)
                                                         </li>
                                                     </ul>
@@ -408,11 +415,15 @@ export default function ImportExcel({ page_settings, course, classroom }) {
                                                 <p>Petunjuk penggunaan:</p>
                                                 <ul className="mt-2 list-disc pl-6">
                                                     <li>Anda dapat mengisi nilai untuk semua kelas sekaligus</li>
+                                                    <li className="font-semibold text-green-600">
+                                                        Nilai Absensi diisi dengan angka 1-16 (jumlah pertemuan yang
+                                                        dihadiri)
+                                                    </li>
                                                     <li>Kolom yang kosong akan diabaikan</li>
                                                     <li>Nilai yang sudah ada akan diperbarui</li>
                                                     <li>
                                                         <strong>Jangan mengubah</strong> kolom nim, name, classroom_id,
-                                                        classroom_name, dan jadwal
+                                                        classroom_name, nama_mata_kuliah, dan jadwal
                                                     </li>
                                                 </ul>
                                             </AlertDescription>
@@ -424,7 +435,7 @@ export default function ImportExcel({ page_settings, course, classroom }) {
                                             className="flex items-center gap-2"
                                         >
                                             <IconCloudUpload className="size-4" />
-                                            {schedulesProcessing ? 'Sedang Memproses...' : 'Import Nilai Semua Jadwal'}
+                                            {schedulesProcessing ? 'Sedang Memproses...' : 'Import Nilai dan Absensi'}
                                         </Button>
                                     </form>
 

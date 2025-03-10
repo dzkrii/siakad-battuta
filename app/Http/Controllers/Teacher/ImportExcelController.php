@@ -118,7 +118,7 @@ class ImportExcelController extends Controller
         ]);
 
         try {
-            Log::info('Starting course schedules grades import');
+            Log::info('Starting course schedules grades import with absensi');
 
             $import = new CourseSchedulesGradesImport($course->id);
             Excel::import($import, $request->file('file'));
@@ -126,9 +126,17 @@ class ImportExcelController extends Controller
             $results = $import->getImportResults();
             Log::info('Course schedules import results', $results);
 
-            $successMessage = "Import berhasil: {$results['success']} nilai baru, {$results['updated']} nilai diperbarui";
-            if ($results['skipped'] > 0 || $results['error'] > 0) {
-                $successMessage .= ", {$results['skipped']} dilewati, {$results['error']} error";
+            // Buat pesan sukses yang menampilkan informasi nilai dan absensi
+            $successMessage = "Import berhasil: {$results['grades_success']} nilai baru, {$results['grades_updated']} nilai diperbarui";
+
+            // Tambahkan informasi absensi jika ada
+            if ($results['attendance_success'] > 0) {
+                $successMessage .= ", {$results['attendance_success']} data absensi";
+            }
+
+            // Tambahkan informasi error jika ada
+            if ($results['grades_skipped'] > 0 || $results['error'] > 0) {
+                $successMessage .= ", {$results['grades_skipped']} dilewati, {$results['error']} error";
             }
 
             flashMessage($successMessage);

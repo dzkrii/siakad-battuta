@@ -26,7 +26,7 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
     $this->courseId = $courseId;
     $this->course = Course::find($courseId);
 
-    // Dapatkan semua jadwal (schedules) untuk mata kuliah ini
+    // Dapatkan semua jadwal untuk mata kuliah ini
     $this->schedules = Schedule::where('course_id', $courseId)
       ->select('id', 'classroom_id', 'day_of_week', 'start_time', 'end_time')
       ->get();
@@ -57,7 +57,9 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
           'name' => $student->user->name,
           'classroom_id' => $classroomId,
           'classroom_name' => $classroom->name ?? "Kelas ID: $classroomId",
+          'nama_mata_kuliah' => $this->course->name ?? '', // Kolom baru untuk nama mata kuliah
           'jadwal' => $jadwalInfo,
+          'nilai_absensi' => '', // Kolom untuk absensi
           'nilai_tugas' => '',
           'nilai_uts' => '',
           'nilai_uas' => ''
@@ -71,7 +73,9 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
           'name' => '----------------------',
           'classroom_id' => '',
           'classroom_name' => '----------------------',
+          'nama_mata_kuliah' => '----------------------',
           'jadwal' => '----------------------',
+          'nilai_absensi' => '',
           'nilai_tugas' => '',
           'nilai_uts' => '',
           'nilai_uas' => ''
@@ -141,14 +145,16 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
   public function headings(): array
   {
     return [
-      'nim',
-      'name',
-      'classroom_id',
-      'classroom_name',
-      'jadwal',
-      'nilai_tugas',
-      'nilai_uts',
-      'nilai_uas'
+      'NIM',
+      'Nama',
+      'Classroom ID',
+      'Kelas',
+      'Nama Mata Kuliah', // Kolom baru untuk nama mata kuliah
+      'Jadwal',
+      'Nilai Absensi', // Kolom untuk absensi (1-16)
+      'Nilai Tugas',
+      'Nilai UTS',
+      'Nilai UAS'
     ];
   }
 
@@ -160,7 +166,7 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
   public function styles(Worksheet $sheet)
   {
     // Style for the header row
-    $sheet->getStyle('A1:H1')->applyFromArray([
+    $sheet->getStyle('A1:J1')->applyFromArray([
       'font' => ['bold' => true],
       'fill' => [
         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
@@ -169,7 +175,7 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
     ]);
 
     // Auto-size columns
-    foreach (range('A', 'H') as $col) {
+    foreach (range('A', 'J') as $col) {
       $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 
@@ -182,31 +188,50 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
     $sheet->getStyle('A' . $lastRow)->getFont()->setBold(true);
 
     $lastRow++;
-    $sheet->setCellValue('A' . $lastRow, '1. Jangan mengubah kolom nim, name, classroom_id, classroom_name, dan jadwal');
+    $sheet->setCellValue('A' . $lastRow, '1. Jangan mengubah kolom nim, name, classroom_id, classroom_name, nama_mata_kuliah, dan jadwal');
 
     $lastRow++;
     $sheet->setCellValue('A' . $lastRow, '2. Isi nilai dalam rentang 0-100');
 
     $lastRow++;
-    $sheet->setCellValue('A' . $lastRow, '3. Kolom yang kosong akan diabaikan');
+    $sheet->setCellValue('A' . $lastRow, '3. Nilai Absensi diisi dengan angka 1-16 (jumlah pertemuan yang dihadiri)');
 
     $lastRow++;
-    $sheet->setCellValue('A' . $lastRow, '4. Anda dapat mengisi salah satu atau semua kolom nilai');
+    $sheet->setCellValue('A' . $lastRow, '4. Kolom yang kosong akan diabaikan');
 
     $lastRow++;
-    $sheet->setCellValue('A' . $lastRow, '5. Data dikelompokkan per kelas dengan jadwal yang berbeda');
+    $sheet->setCellValue('A' . $lastRow, '5. Anda dapat mengisi salah satu atau semua kolom nilai');
+
+    $lastRow++;
+    $sheet->setCellValue('A' . $lastRow, '6. Data dikelompokkan per kelas dengan jadwal yang berbeda');
 
     // Merge cells for instruction text
-    foreach (range($lastRow - 5, $lastRow) as $row) {
-      $sheet->mergeCells('A' . $row . ':H' . $row);
+    foreach (range($lastRow - 6, $lastRow) as $row) {
+      $sheet->mergeCells('A' . $row . ':J' . $row);
     }
 
-    // Set nilai_tugas, nilai_uts, nilai_uas columns to have a light yellow background
-    $lastDataRow = $sheet->getHighestRow() - 6; // Excluding instruction rows
-    $sheet->getStyle('F2:H' . $lastDataRow)->applyFromArray([
+    // Set nama mata kuliah dengan warna latar berbeda
+    $lastDataRow = $sheet->getHighestRow() - 7; // Excluding instruction rows
+    $sheet->getStyle('E2:E' . $lastDataRow)->applyFromArray([
       'fill' => [
         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-        'startColor' => ['rgb' => 'FFFDE7']
+        'startColor' => ['rgb' => 'FFF9C4'] // Light yellow background for mata kuliah
+      ]
+    ]);
+
+    // Set nilai_absensi dengan warna latar berbeda 
+    $sheet->getStyle('G2:G' . $lastDataRow)->applyFromArray([
+      'fill' => [
+        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+        'startColor' => ['rgb' => 'E8F5E9'] // Light green background for absensi
+      ]
+    ]);
+
+    // Set nilai_tugas, nilai_uts, nilai_uas columns to have a light blue background
+    $sheet->getStyle('H2:J' . $lastDataRow)->applyFromArray([
+      'fill' => [
+        'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+        'startColor' => ['rgb' => 'E3F2FD'] // Light blue for nilai
       ]
     ]);
 

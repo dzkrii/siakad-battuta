@@ -3,6 +3,7 @@
 namespace App\Imports;
 
 use App\Models\Grade;
+use App\Models\Attendance;
 use App\Models\Course;
 use App\Models\Student;
 use App\Models\Schedule;
@@ -28,11 +29,12 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
   {
     $this->courseId = $courseId;
     $this->importResults = [
-      'success' => 0,
-      'skipped' => 0,
-      'updated' => 0,
-      'error' => 0,
+      'grades_success' => 0,
+      'grades_updated' => 0,
+      'grades_skipped' => 0,
+      'attendance_success' => 0,
       'rows_processed' => 0,
+      'error' => 0,
       'details' => []
     ];
 
@@ -75,8 +77,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
     }
 
     Log::info('Student mapping created', [
-      'total_mappings' => count($this->studentMapping),
-      'sample_keys' => array_slice(array_keys($this->studentMapping), 0, 3)
+      'total_mappings' => count($this->studentMapping)
     ]);
   }
 
@@ -93,13 +94,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
 
         // Skip pembatas baris (biasanya baris kosong/pemisah antar kelas)
         if (empty($row['nim']) || empty($row['classroom_id'])) {
-          $this->importResults['skipped']++;
-          $this->importResults['details'][] = [
-            'row' => $index + 2, // +2 karena Excel dimulai dari 1 dan headingRow
-            'status' => 'skipped',
-            'reason' => 'Empty NIM or classroom_id',
-            'data' => json_encode(array_filter((array)$row))
-          ];
+          $this->importResults['grades_skipped']++;
           continue;
         }
 
@@ -107,6 +102,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
         Log::info("Processing row $index", [
           'nim' => $row['nim'],
           'classroom_id' => $row['classroom_id'],
+          'has_absensi' => isset($row['nilai_absensi']) && $row['nilai_absensi'] !== '' && $row['nilai_absensi'] !== null,
           'has_tugas' => isset($row['nilai_tugas']) && $row['nilai_tugas'] !== '' && $row['nilai_tugas'] !== null,
           'has_uts' => isset($row['nilai_uts']) && $row['nilai_uts'] !== '' && $row['nilai_uts'] !== null,
           'has_uas' => isset($row['nilai_uas']) && $row['nilai_uas'] !== '' && $row['nilai_uas'] !== null,
@@ -114,13 +110,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
 
         // Verifikasi classroom_id ada dalam daftar kelas untuk mata kuliah ini
         if (!in_array($row['classroom_id'], $this->classroomIds)) {
-          $this->importResults['skipped']++;
-          $this->importResults['details'][] = [
-            'row' => $index + 2,
-            'status' => 'skipped',
-            'reason' => "Classroom ID {$row['classroom_id']} not related to this course",
-            'data' => json_encode(['nim' => $row['nim'], 'classroom_id' => $row['classroom_id']])
-          ];
+          $this->importResults['grades_skipped']++;
           Log::warning("Classroom not related to this course", [
             'classroom_id' => $row['classroom_id'],
             'available_classrooms' => $this->classroomIds
@@ -133,18 +123,11 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
         $studentData = $this->studentMapping[$lookupKey] ?? null;
 
         if (!$studentData) {
-          $this->importResults['skipped']++;
-          $this->importResults['details'][] = [
-            'row' => $index + 2,
-            'status' => 'skipped',
-            'reason' => "Student with NIM {$row['nim']} not found in classroom {$row['classroom_id']}",
-            'data' => json_encode(['nim' => $row['nim'], 'classroom_id' => $row['classroom_id']])
-          ];
+          $this->importResults['grades_skipped']++;
           Log::warning("Student not found", [
             'lookup_key' => $lookupKey,
             'nim' => $row['nim'],
-            'classroom_id' => $row['classroom_id'],
-            'available_mappings_sample' => array_slice(array_keys($this->studentMapping), 0, 5)
+            'classroom_id' => $row['classroom_id']
           ]);
           continue;
         }
@@ -152,36 +135,24 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
         $studentId = $studentData['id'];
         $classroomId = $studentData['classroom_id'];
 
-        // Hitung berapa nilai yang diproses dari baris ini
-        $valuesProcessed = 0;
+        // 1. Proses absensi jika ada
+        if (isset($row['nilai_absensi']) && $row['nilai_absensi'] !== '' && $row['nilai_absensi'] !== null) {
+          $this->processAttendance($studentId, $classroomId, (int)$row['nilai_absensi'], $index);
+        }
 
-        // Proses nilai tugas
+        // 2. Proses nilai tugas
         if (isset($row['nilai_tugas']) && $row['nilai_tugas'] !== '' && $row['nilai_tugas'] !== null) {
-          $result = $this->processGrade($studentId, $classroomId, 'tugas', $row['nilai_tugas'], $index);
-          if ($result) $valuesProcessed++;
+          $this->processGrade($studentId, $classroomId, 'tugas', $row['nilai_tugas'], $index);
         }
 
-        // Proses nilai UTS
+        // 3. Proses nilai UTS
         if (isset($row['nilai_uts']) && $row['nilai_uts'] !== '' && $row['nilai_uts'] !== null) {
-          $result = $this->processGrade($studentId, $classroomId, 'uts', $row['nilai_uts'], $index);
-          if ($result) $valuesProcessed++;
+          $this->processGrade($studentId, $classroomId, 'uts', $row['nilai_uts'], $index);
         }
 
-        // Proses nilai UAS
+        // 4. Proses nilai UAS
         if (isset($row['nilai_uas']) && $row['nilai_uas'] !== '' && $row['nilai_uas'] !== null) {
-          $result = $this->processGrade($studentId, $classroomId, 'uas', $row['nilai_uas'], $index);
-          if ($result) $valuesProcessed++;
-        }
-
-        // Jika tidak ada nilai yang diproses, catat sebagai dilewati
-        if ($valuesProcessed === 0) {
-          $this->importResults['skipped']++;
-          $this->importResults['details'][] = [
-            'row' => $index + 2,
-            'status' => 'skipped',
-            'reason' => "No valid grades found",
-            'data' => json_encode(['nim' => $row['nim'], 'classroom_id' => $row['classroom_id']])
-          ];
+          $this->processGrade($studentId, $classroomId, 'uas', $row['nilai_uas'], $index);
         }
       }
 
@@ -204,13 +175,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
     try {
       // Pastikan nilai valid dan dalam rentang
       if (!is_numeric($value)) {
-        $this->importResults['skipped']++;
-        $this->importResults['details'][] = [
-          'row' => $rowIndex + 2,
-          'status' => 'invalid',
-          'reason' => "Non-numeric value for $category: '$value'",
-          'data' => json_encode(['student_id' => $studentId, 'classroom_id' => $classroomId, 'category' => $category])
-        ];
+        $this->importResults['grades_skipped']++;
         Log::warning("Non-numeric value", ['category' => $category, 'value' => $value]);
         return false;
       }
@@ -218,13 +183,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
       $roundedValue = round((float)$value);
 
       if ($roundedValue < 0 || $roundedValue > 100) {
-        $this->importResults['skipped']++;
-        $this->importResults['details'][] = [
-          'row' => $rowIndex + 2,
-          'status' => 'invalid',
-          'reason' => "Value out of range (0-100) for $category: '$value'",
-          'data' => json_encode(['student_id' => $studentId, 'classroom_id' => $classroomId, 'category' => $category])
-        ];
+        $this->importResults['grades_skipped']++;
         Log::warning("Value out of range", ['category' => $category, 'value' => $value]);
         return false;
       }
@@ -244,18 +203,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
         $result = $existingGrade->save();
 
         if ($result) {
-          $this->importResults['updated']++;
-          $this->importResults['details'][] = [
-            'row' => $rowIndex + 2,
-            'status' => 'updated',
-            'info' => "Updated $category: $oldValue → $roundedValue",
-            'data' => json_encode([
-              'student_id' => $studentId,
-              'course_id' => $this->courseId,
-              'classroom_id' => $classroomId,
-              'category' => $category
-            ])
-          ];
+          $this->importResults['grades_updated']++;
           Log::info("Updated grade", [
             'student_id' => $studentId,
             'course_id' => $this->courseId,
@@ -286,18 +234,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
         $result = $grade->save();
 
         if ($result) {
-          $this->importResults['success']++;
-          $this->importResults['details'][] = [
-            'row' => $rowIndex + 2,
-            'status' => 'created',
-            'info' => "Created new $category grade: $roundedValue",
-            'data' => json_encode([
-              'student_id' => $studentId,
-              'course_id' => $this->courseId,
-              'classroom_id' => $classroomId,
-              'category' => $category
-            ])
-          ];
+          $this->importResults['grades_success']++;
           Log::info("Created grade", [
             'student_id' => $studentId,
             'course_id' => $this->courseId,
@@ -320,17 +257,6 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
       return true;
     } catch (\Exception $e) {
       $this->importResults['error']++;
-      $this->importResults['details'][] = [
-        'row' => $rowIndex + 2,
-        'status' => 'error',
-        'reason' => $e->getMessage(),
-        'data' => json_encode([
-          'student_id' => $studentId,
-          'course_id' => $this->courseId,
-          'classroom_id' => $classroomId,
-          'category' => $category
-        ])
-      ];
       Log::error("Error processing grade", [
         'student_id' => $studentId,
         'course_id' => $this->courseId,
@@ -342,11 +268,73 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
     }
   }
 
+  protected function processAttendance($studentId, $classroomId, $totalMeetings, $rowIndex)
+  {
+    try {
+      // Validasi nilai absensi
+      if (!is_numeric($totalMeetings) || $totalMeetings < 0 || $totalMeetings > 16) {
+        Log::warning("Invalid attendance value", [
+          'student_id' => $studentId,
+          'value' => $totalMeetings
+        ]);
+        return false;
+      }
+
+      $totalMeetings = (int)$totalMeetings;
+
+      // Hapus data absensi yang sudah ada untuk mata kuliah ini
+      Attendance::where([
+        'student_id' => $studentId,
+        'course_id' => $this->courseId,
+        'classroom_id' => $classroomId,
+      ])->delete();
+
+      // Buat absensi baru untuk setiap pertemuan yang dihadiri
+      $attendanceCreated = 0;
+
+      for ($section = 1; $section <= $totalMeetings; $section++) {
+        $attendance = new Attendance();
+        $attendance->student_id = $studentId;
+        $attendance->course_id = $this->courseId;
+        $attendance->classroom_id = $classroomId;
+        $attendance->status = true; // Hadir
+        $attendance->section = $section;
+
+        if ($attendance->save()) {
+          $attendanceCreated++;
+        }
+      }
+
+      $this->importResults['attendance_success'] += $attendanceCreated;
+
+      Log::info("Created attendance records", [
+        'student_id' => $studentId,
+        'course_id' => $this->courseId,
+        'classroom_id' => $classroomId,
+        'total_meetings' => $totalMeetings,
+        'records_created' => $attendanceCreated
+      ]);
+
+      return $attendanceCreated > 0;
+    } catch (\Exception $e) {
+      $this->importResults['error']++;
+      Log::error("Error processing attendance", [
+        'student_id' => $studentId,
+        'course_id' => $this->courseId,
+        'classroom_id' => $classroomId,
+        'error' => $e->getMessage()
+      ]);
+      return false;
+    }
+  }
+
   public function rules(): array
   {
     return [
       'nim' => 'nullable',
       'classroom_id' => 'nullable|numeric',
+      'nama_mata_kuliah' => 'nullable', // Tambahkan validasi untuk kolom nama mata kuliah
+      'nilai_absensi' => 'nullable|integer|min:0|max:16',
       'nilai_tugas' => 'nullable|numeric|min:0|max:100',
       'nilai_uts' => 'nullable|numeric|min:0|max:100',
       'nilai_uas' => 'nullable|numeric|min:0|max:100',
