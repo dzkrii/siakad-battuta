@@ -57,9 +57,10 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
           'name' => $student->user->name,
           'classroom_id' => $classroomId,
           'classroom_name' => $classroom->name ?? "Kelas ID: $classroomId",
-          'nama_mata_kuliah' => $this->course->name ?? '', // Kolom baru untuk nama mata kuliah
+          'course_id' => $this->courseId, // Menambahkan course_id untuk validasi
+          'nama_mata_kuliah' => $this->course->name ?? '',
           'jadwal' => $jadwalInfo,
-          'nilai_absensi' => '', // Kolom untuk absensi
+          'nilai_absensi' => '',
           'nilai_tugas' => '',
           'nilai_uts' => '',
           'nilai_uas' => ''
@@ -73,6 +74,7 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
           'name' => '----------------------',
           'classroom_id' => '',
           'classroom_name' => '----------------------',
+          'course_id' => '',
           'nama_mata_kuliah' => '----------------------',
           'jadwal' => '----------------------',
           'nilai_absensi' => '',
@@ -149,9 +151,10 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
       'Nama',
       'Classroom ID',
       'Kelas',
-      'Nama Mata Kuliah', // Kolom baru untuk nama mata kuliah
+      'Course ID', // Tambahkan kolom baru untuk Course ID
+      'Nama Mata Kuliah',
       'Jadwal',
-      'Nilai Absensi', // Kolom untuk absensi (1-16)
+      'Nilai Absensi',
       'Nilai Tugas',
       'Nilai UTS',
       'Nilai UAS'
@@ -166,7 +169,7 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
   public function styles(Worksheet $sheet)
   {
     // Style for the header row
-    $sheet->getStyle('A1:J1')->applyFromArray([
+    $sheet->getStyle('A1:K1')->applyFromArray([
       'font' => ['bold' => true],
       'fill' => [
         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
@@ -175,7 +178,7 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
     ]);
 
     // Auto-size columns
-    foreach (range('A', 'J') as $col) {
+    foreach (range('A', 'K') as $col) {
       $sheet->getColumnDimension($col)->setAutoSize(true);
     }
 
@@ -188,7 +191,7 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
     $sheet->getStyle('A' . $lastRow)->getFont()->setBold(true);
 
     $lastRow++;
-    $sheet->setCellValue('A' . $lastRow, '1. Jangan mengubah kolom nim, name, classroom_id, classroom_name, nama_mata_kuliah, dan jadwal');
+    $sheet->setCellValue('A' . $lastRow, '1. Jangan mengubah kolom nim, name, classroom_id, classroom_name, course_id, nama_mata_kuliah, dan jadwal');
 
     $lastRow++;
     $sheet->setCellValue('A' . $lastRow, '2. Isi nilai dalam rentang 0-100');
@@ -207,20 +210,20 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
 
     // Merge cells for instruction text
     foreach (range($lastRow - 6, $lastRow) as $row) {
-      $sheet->mergeCells('A' . $row . ':J' . $row);
+      $sheet->mergeCells('A' . $row . ':K' . $row);
     }
 
-    // Set nama mata kuliah dengan warna latar berbeda
+    // Set course_id dan nama mata kuliah dengan warna latar berbeda
     $lastDataRow = $sheet->getHighestRow() - 7; // Excluding instruction rows
-    $sheet->getStyle('E2:E' . $lastDataRow)->applyFromArray([
+    $sheet->getStyle('E2:F' . $lastDataRow)->applyFromArray([
       'fill' => [
         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-        'startColor' => ['rgb' => 'FFF9C4'] // Light yellow background for mata kuliah
+        'startColor' => ['rgb' => 'FFF9C4'] // Light yellow background for course info
       ]
     ]);
 
     // Set nilai_absensi dengan warna latar berbeda 
-    $sheet->getStyle('G2:G' . $lastDataRow)->applyFromArray([
+    $sheet->getStyle('H2:H' . $lastDataRow)->applyFromArray([
       'fill' => [
         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
         'startColor' => ['rgb' => 'E8F5E9'] // Light green background for absensi
@@ -228,12 +231,16 @@ class CourseSchedulesTemplateExport implements FromCollection, WithHeadings, Wit
     ]);
 
     // Set nilai_tugas, nilai_uts, nilai_uas columns to have a light blue background
-    $sheet->getStyle('H2:J' . $lastDataRow)->applyFromArray([
+    $sheet->getStyle('I2:K' . $lastDataRow)->applyFromArray([
       'fill' => [
         'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
         'startColor' => ['rgb' => 'E3F2FD'] // Light blue for nilai
       ]
     ]);
+
+    // Sembunyikan (hide) kolom course_id karena hanya untuk validasi
+    // Tapi tetap bisa diakses oleh sistem saat import
+    $sheet->getColumnDimension('E')->setVisible(false);
 
     return [
       1 => ['font' => ['bold' => true]],

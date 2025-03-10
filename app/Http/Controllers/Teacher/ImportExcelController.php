@@ -53,12 +53,18 @@ class ImportExcelController extends Controller
 
     public function downloadCourseSchedulesTemplate(Course $course)
     {
-        $filename = 'template_nilai_semua_jadwal_' . $course->name . '.xlsx';
+        try {
+            $filename = 'template_nilai_semua_jadwal_' . $course->name . '.xlsx';
 
-        return Excel::download(
-            new CourseSchedulesTemplateExport($course->id),
-            $filename
-        );
+            return Excel::download(
+                new CourseSchedulesTemplateExport($course->id),
+                $filename
+            );
+        } catch (\Throwable $e) {
+            Log::error('Error downloading template: ' . $e->getMessage());
+            flashMessage('Terjadi kesalahan saat mengunduh template: ' . $e->getMessage(), 'error');
+            return back();
+        }
     }
 
     // Template Absensi
@@ -118,7 +124,10 @@ class ImportExcelController extends Controller
         ]);
 
         try {
-            Log::info('Starting course schedules grades import with absensi');
+            Log::info('Starting course schedules grades import with course ID validation', [
+                'course_id' => $course->id,
+                'course_name' => $course->name
+            ]);
 
             $import = new CourseSchedulesGradesImport($course->id);
             Excel::import($import, $request->file('file'));
@@ -126,12 +135,17 @@ class ImportExcelController extends Controller
             $results = $import->getImportResults();
             Log::info('Course schedules import results', $results);
 
-            // Buat pesan sukses yang menampilkan informasi nilai dan absensi
+            // Buat pesan sukses yang menampilkan informasi nilai, absensi, dan mismatch
             $successMessage = "Import berhasil: {$results['grades_success']} nilai baru, {$results['grades_updated']} nilai diperbarui";
 
             // Tambahkan informasi absensi jika ada
             if ($results['attendance_success'] > 0) {
                 $successMessage .= ", {$results['attendance_success']} data absensi";
+            }
+
+            // Tambahkan informasi baris yang dilewati karena course ID tidak cocok
+            if (isset($results['course_mismatch']) && $results['course_mismatch'] > 0) {
+                $successMessage .= ", {$results['course_mismatch']} baris berbeda mata kuliah dilewati";
             }
 
             // Tambahkan informasi error jika ada

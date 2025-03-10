@@ -21,6 +21,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
   use Importable;
 
   protected $courseId;
+  protected $course;
   protected $classroomIds = [];
   protected $studentMapping = [];
   public $importResults = [];
@@ -28,11 +29,18 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
   public function __construct($courseId)
   {
     $this->courseId = $courseId;
+    $this->course = Course::find($courseId);
+
+    if (!$this->course) {
+      throw new \Exception("Course with ID $courseId not found");
+    }
+
     $this->importResults = [
       'grades_success' => 0,
       'grades_updated' => 0,
       'grades_skipped' => 0,
       'attendance_success' => 0,
+      'course_mismatch' => 0, // Counter khusus untuk baris yang tidak cocok course ID-nya
       'rows_processed' => 0,
       'error' => 0,
       'details' => []
@@ -49,6 +57,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
     // Verbose logging untuk debugging
     Log::info('CourseSchedulesGradesImport initialized', [
       'course_id' => $courseId,
+      'course_name' => $this->course->name,
       'found_classrooms' => count($this->classroomIds),
       'classroom_ids' => $this->classroomIds
     ]);
@@ -60,8 +69,7 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
         ->get();
 
       Log::info("Loaded students for classroom $classroomId", [
-        'count' => $students->count(),
-        'first_few' => $students->take(3)->pluck('student_number')->toArray()
+        'count' => $students->count()
       ]);
 
       // Buat mapping untuk lookup cepat
@@ -94,18 +102,58 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
 
         // Skip pembatas baris (biasanya baris kosong/pemisah antar kelas)
         if (empty($row['nim']) || empty($row['classroom_id'])) {
-          $this->importResults['grades_skipped']++;
+          Log::info("Skipping separator row at index $index");
           continue;
+        }
+
+        // VALIDASI: Verifikasi course_id 
+        if (isset($row['course_id']) && $row['course_id'] !== '') {
+          $excelCourseId = (string)$row['course_id']; // Konversi ke string untuk perbandingan yang aman
+          $currentCourseId = (string)$this->courseId;
+
+          // Validasi yang lebih ketat: course_id harus sama persis
+          if ($excelCourseId !== $currentCourseId) {
+            $this->importResults['course_mismatch']++;
+            Log::info("Skipping row due to course ID mismatch", [
+              'row_index' => $index,
+              'excel_course_id' => $excelCourseId,
+              'current_course_id' => $currentCourseId,
+              'nim' => $row['nim']
+            ]);
+            continue;
+          }
+        } else {
+          // Jika tidak ada course_id, gunakan fallback ke validasi nama mata kuliah
+          // (untuk kompatibilitas dengan template lama tanpa course_id)
+          if (isset($row['nama_mata_kuliah']) && $row['nama_mata_kuliah'] !== '') {
+            // Normalisasi nama mata kuliah untuk perbandingan
+            $excelCourseName = trim(strtolower($row['nama_mata_kuliah']));
+            $currentCourseName = trim(strtolower($this->course->name));
+
+            // Cari kesamaan parsial
+            if (
+              strpos($excelCourseName, $currentCourseName) === false &&
+              strpos($currentCourseName, $excelCourseName) === false
+            ) {
+              $this->importResults['course_mismatch']++;
+              Log::info("Skipping row due to course name mismatch (fallback validation)", [
+                'row_index' => $index,
+                'excel_course' => $row['nama_mata_kuliah'],
+                'current_course' => $this->course->name,
+                'nim' => $row['nim']
+              ]);
+              continue;
+            }
+          }
         }
 
         // Debug data row untuk memastikan format benar
         Log::info("Processing row $index", [
           'nim' => $row['nim'],
           'classroom_id' => $row['classroom_id'],
-          'has_absensi' => isset($row['nilai_absensi']) && $row['nilai_absensi'] !== '' && $row['nilai_absensi'] !== null,
-          'has_tugas' => isset($row['nilai_tugas']) && $row['nilai_tugas'] !== '' && $row['nilai_tugas'] !== null,
-          'has_uts' => isset($row['nilai_uts']) && $row['nilai_uts'] !== '' && $row['nilai_uts'] !== null,
-          'has_uas' => isset($row['nilai_uas']) && $row['nilai_uas'] !== '' && $row['nilai_uas'] !== null,
+          'course_id' => $row['course_id'] ?? 'not set',
+          'mata_kuliah' => $row['nama_mata_kuliah'] ?? 'not set',
+          'has_tugas' => isset($row['nilai_tugas']) && $row['nilai_tugas'] !== '' && $row['nilai_tugas'] !== null
         ]);
 
         // Verifikasi classroom_id ada dalam daftar kelas untuk mata kuliah ini
@@ -333,7 +381,8 @@ class CourseSchedulesGradesImport implements ToCollection, WithHeadingRow, WithV
     return [
       'nim' => 'nullable',
       'classroom_id' => 'nullable|numeric',
-      'nama_mata_kuliah' => 'nullable', // Tambahkan validasi untuk kolom nama mata kuliah
+      'course_id' => 'nullable', // Validasi untuk kolom course_id
+      'nama_mata_kuliah' => 'nullable',
       'nilai_absensi' => 'nullable|integer|min:0|max:16',
       'nilai_tugas' => 'nullable|numeric|min:0|max:100',
       'nilai_uts' => 'nullable|numeric|min:0|max:100',
