@@ -1,5 +1,5 @@
 export default function WhatsAppHelpdesk() {
-    const phoneNumber = '6285362489310'; // Nomor WhatsApp Anda
+    const phoneNumber = '6285182197560'; // Nomor WhatsApp Anda
     const message = ''; // Pesan default
 
     return (
