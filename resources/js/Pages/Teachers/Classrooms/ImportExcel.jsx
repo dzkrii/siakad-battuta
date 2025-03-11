@@ -61,6 +61,18 @@ export default function ImportExcel({ page_settings, course, classroom }) {
         file: null,
     });
 
+    // Form untuk import excel dosen
+    const {
+        data: dosenExcelData,
+        setData: setDosenExcelData,
+        post: postDosenExcel,
+        processing: dosenExcelProcessing,
+        errors: dosenExcelErrors,
+        reset: dosenExcelReset,
+    } = useForm({
+        file: null,
+    });
+
     // Download template nilai (single classroom)
     const handleDownloadGradeTemplate = () => {
         window.location.href = route('teachers.classrooms.template.grade', [course.id, classroom.id]);
@@ -79,6 +91,23 @@ export default function ImportExcel({ page_settings, course, classroom }) {
     // Download template absensi semua jadwal
     const handleDownloadAttendanceSchedulesTemplate = () => {
         window.location.href = route('teachers.courses.template.attendance-schedules', [course.id]);
+    };
+
+    // Handle submit form excel dosen
+    const handleDosenExcelSubmit = (e) => {
+        e.preventDefault();
+
+        postDosenExcel(route('teachers.classrooms.import.dosen-excel', [course.id, classroom.id]), {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success('File Excel dosen berhasil diimpor');
+                dosenExcelReset();
+            },
+            onError: (errors) => {
+                toast.error('Terjadi kesalahan saat import Excel dosen');
+                console.error(errors);
+            },
+        });
     };
 
     // Handle submit form nilai (single classroom)
@@ -230,6 +259,17 @@ export default function ImportExcel({ page_settings, course, classroom }) {
                                     className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
                                 />
                                 <span>Semua Jadwal Mata Kuliah</span>
+                            </label>
+                            <label className="flex items-center space-x-2">
+                                <input
+                                    type="radio"
+                                    name="importMode"
+                                    value="dosen_excel"
+                                    checked={importMode === 'dosen_excel'}
+                                    onChange={() => setImportMode('dosen_excel')}
+                                    className="h-4 w-4 border-gray-300 text-orange-600 focus:ring-orange-500"
+                                />
+                                <span>Excel Dosen (Langsung)</span>
                             </label>
                         </div>
                     </div>
@@ -445,6 +485,101 @@ export default function ImportExcel({ page_settings, course, classroom }) {
                                             memungkinkan Anda mengimpor nilai untuk{' '}
                                             <strong>semua jadwal mata kuliah {course.name} sekaligus</strong>, meskipun
                                             diampu oleh beberapa dosen!
+                                        </AlertDescription>
+                                    </Alert>
+                                </div>
+                            )}
+
+                            {/* Tampilkan form import untuk Excel Dosen jika mode yang dipilih adalah dosen_excel */}
+                            {importMode === 'dosen_excel' && (
+                                <div className="flex flex-col space-y-4">
+                                    <div className="flex flex-col space-y-2">
+                                        <label className="text-sm font-medium text-gray-700">
+                                            Import Langsung dari Excel Dosen
+                                        </label>
+                                        <div className="flex items-center space-x-4">
+                                            <Alert className="flex-1">
+                                                <AlertDescription>
+                                                    <p>File Excel dosen akan diproses dengan ketentuan:</p>
+                                                    <ul className="mt-2 list-disc pl-6">
+                                                        <li>
+                                                            <strong>NIM/Nomor Mahasiswa</strong>: Untuk identifikasi
+                                                            mahasiswa
+                                                        </li>
+                                                        <li>
+                                                            <strong>Partisipatif/Kehadiran</strong>: Dikonversi ke data
+                                                            absensi
+                                                        </li>
+                                                        <li>
+                                                            <strong>Proyek/Tugas</strong>: Diisi ke nilai tugas
+                                                        </li>
+                                                        <li>
+                                                            <strong>UTS</strong>: Nilai ujian tengah semester
+                                                        </li>
+                                                        <li>
+                                                            <strong>UAS</strong>: Nilai ujian akhir semester
+                                                        </li>
+                                                    </ul>
+                                                    <p className="mt-2">
+                                                        Sistem akan otomatis mendeteksi kolom berdasarkan nama yang
+                                                        mirip dengan kategori di atas.
+                                                    </p>
+                                                </AlertDescription>
+                                            </Alert>
+                                        </div>
+                                    </div>
+
+                                    <form onSubmit={handleDosenExcelSubmit} className="space-y-4">
+                                        <div className="flex flex-col space-y-2">
+                                            <label
+                                                htmlFor="dosenExcelFile"
+                                                className="text-sm font-medium text-gray-700"
+                                            >
+                                                Upload File Excel Dosen
+                                            </label>
+                                            <Input
+                                                id="dosenExcelFile"
+                                                type="file"
+                                                accept=".xlsx,.xls,.csv"
+                                                onChange={(e) => setDosenExcelData('file', e.target.files[0])}
+                                            />
+                                            {dosenExcelErrors.file && (
+                                                <p className="text-sm text-red-500">{dosenExcelErrors.file}</p>
+                                            )}
+                                        </div>
+
+                                        <Alert variant="warning">
+                                            <AlertDescription>
+                                                <p>Petunjuk penggunaan:</p>
+                                                <ul className="mt-2 list-disc pl-6">
+                                                    <li>
+                                                        Upload <strong>tanpa modifikasi</strong> file Excel yang
+                                                        diberikan oleh dosen
+                                                    </li>
+                                                    <li>Pastikan file berisi kolom untuk NIM/Nomor Mahasiswa</li>
+                                                    <li>Sistem akan mencoba mendeteksi kolom nilai secara otomatis</li>
+                                                    <li>
+                                                        Jika mahasiswa tidak ditemukan, baris tersebut akan dilewati
+                                                    </li>
+                                                </ul>
+                                            </AlertDescription>
+                                        </Alert>
+
+                                        <Button
+                                            type="submit"
+                                            disabled={dosenExcelProcessing}
+                                            className="flex items-center gap-2"
+                                        >
+                                            <IconCloudUpload className="size-4" />
+                                            {dosenExcelProcessing ? 'Sedang Memproses...' : 'Import Excel Dosen'}
+                                        </Button>
+                                    </form>
+
+                                    <Alert className="mt-4 bg-green-50 text-green-800">
+                                        <AlertDescription>
+                                            <strong className="font-medium">🔥 Fitur Baru:</strong> Mode ini
+                                            memungkinkan Anda mengimpor langsung dari file Excel dosen tanpa perlu
+                                            menyesuaikan format terlebih dahulu!
                                         </AlertDescription>
                                     </Alert>
                                 </div>

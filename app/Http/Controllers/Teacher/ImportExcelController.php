@@ -22,6 +22,7 @@ use App\Imports\CourseSchedulesGradesImport;
 use App\Exports\CourseSchedulesTemplateExport;
 use App\Imports\CourseSchedulesAttendancesImport;
 use App\Exports\CourseSchedulesAttendanceTemplateExport;
+use App\Imports\CustomDosenExcelImport;
 use Illuminate\Support\Facades\Log;
 
 class ImportExcelController extends Controller
@@ -214,6 +215,57 @@ class ImportExcelController extends Controller
             return back();
         } catch (\Throwable $e) {
             Log::error('Import Course Schedules Attendances Error: ' . $e->getMessage());
+            Log::error($e->getTraceAsString());
+            flashMessage('Terjadi kesalahan: ' . $e->getMessage(), 'error');
+            return back();
+        }
+    }
+
+    /**
+     * Import nilai langsung dari Excel dosen tanpa perlu menyesuaikan dengan template siakad
+     */
+    public function importDosenExcel(Course $course, Classroom $classroom, Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv'
+        ]);
+
+        try {
+            Log::info('Starting direct dosen excel import', [
+                'course_id' => $course->id,
+                'course_name' => $course->name,
+                'classroom_id' => $classroom->id,
+                'classroom_name' => $classroom->name
+            ]);
+
+            $import = new CustomDosenExcelImport($course->id, $classroom->id);
+            Excel::import($import, $request->file('file'));
+
+            $results = $import->getImportResults();
+            Log::info('Dosen excel import results', $results);
+
+            // Buat pesan sukses yang menampilkan informasi nilai dan absensi
+            $successMessage = "Import Excel Dosen berhasil: {$results['grades_success']} nilai baru, {$results['grades_updated']} nilai diperbarui";
+
+            // Tambahkan informasi absensi jika ada
+            if ($results['attendance_success'] > 0) {
+                $successMessage .= ", {$results['attendance_success']} data absensi";
+            }
+
+            // Tambahkan informasi mahasiswa yang tidak ditemukan
+            if ($results['students_not_found'] > 0) {
+                $successMessage .= ", {$results['students_not_found']} mahasiswa tidak ditemukan";
+            }
+
+            // Tambahkan informasi error jika ada
+            if ($results['grades_skipped'] > 0 || $results['error'] > 0) {
+                $successMessage .= ", {$results['grades_skipped']} dilewati, {$results['error']} error";
+            }
+
+            flashMessage($successMessage);
+            return back();
+        } catch (\Throwable $e) {
+            Log::error('Import Dosen Excel Error: ' . $e->getMessage());
             Log::error($e->getTraceAsString());
             flashMessage('Terjadi kesalahan: ' . $e->getMessage(), 'error');
             return back();

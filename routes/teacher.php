@@ -50,5 +50,8 @@ Route::prefix('teachers')->middleware(['auth', 'role:Teacher'])->group(function 
             ->name('teachers.classrooms.import.attendances');
         Route::post('courses/{course}/import/attendance-schedules', 'importCourseSchedulesAttendances')
             ->name('teachers.courses.import.attendance-schedules');
+
+        Route::post('courses/{course}/classrooms/{classroom}/import/dosen-excel', 'importDosenExcel')
+            ->name('teachers.classrooms.import.dosen-excel');
     });
 });
