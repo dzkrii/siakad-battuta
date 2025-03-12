@@ -24,7 +24,7 @@ class StudentOperatorController extends Controller
     use HasFile;
     public function index(): Response
     {
-        $students = Student::query()
+        $query = Student::query()
             ->select(['students.id', 'students.user_id', 'students.faculty_id', 'students.department_id', 'students.fee_group_id', 'students.classroom_id', 'students.student_number', 'students.semester', 'students.batch', 'students.created_at'])
             ->filter(request()->only(['search']))
             ->sorting(request()->only(['field', 'direction']))
@@ -32,17 +32,32 @@ class StudentOperatorController extends Controller
                 $query->whereHas('roles', fn($query) => $query->where('name', 'Student'));
             })
             ->where('students.faculty_id', auth()->user()->operator->faculty_id)
-            ->where('students.department_id', auth()->user()->operator->department_id)
-            ->with(['user', 'classroom', 'feeGroup'])
+            ->where('students.department_id', auth()->user()->operator->department_id);
+
+        // Filter for pending study plans if requested
+        if (request()->has('pending_study_plans') && request()->pending_study_plans) {
+            $query->whereHas('studyPlans', function ($query) {
+                $query->where('status', StudyPlanStatus::PENDING->value);
+            });
+        }
+
+        $students = $query->with(['user', 'classroom', 'feeGroup'])
             ->paginate(request()->load ?? 10);
 
         $faculty_name = auth()->user()->operator->faculty?->name;
         $department_name = auth()->user()->operator->department?->name;
 
+        $subtitle = "Menampilkan semua data mahasiswa yang ada di {$faculty_name}, Program Studi {$department_name}.";
+
+        // Customize subtitle if filtering by pending study plans
+        if (request()->has('pending_study_plans') && request()->pending_study_plans) {
+            $subtitle = "Menampilkan mahasiswa dengan Kartu Rencana Studi (KRS) yang menunggu persetujuan.";
+        }
+
         return inertia('Operators/Students/Index', [
             'page_settings' => [
                 'title' => 'Mahasiswa',
-                'subtitle' => "Menampilkan semua data mahasiswa yang ada di {$faculty_name}, Program Studi {$department_name}.",
+                'subtitle' => $subtitle,
             ],
             'students' => StudentOperatorResource::collection($students)->additional([
                 'meta' => [
@@ -52,11 +67,13 @@ class StudentOperatorController extends Controller
             'state' => [
                 'page' => request()->page ?? 1,
                 'search' => request()->search ?? '',
-                'load' => 10,
+                'load' => request()->load ?? 10,
+                'pending_study_plans' => request()->has('pending_study_plans') ? (bool) request()->pending_study_plans : false,
             ],
         ]);
     }
 
+    // Existing approveStudyPlans method can remain as is or be modified if needed
     public function approveStudyPlans(): Response
     {
         $students = Student::query()
@@ -66,15 +83,10 @@ class StudentOperatorController extends Controller
             ->whereHas('user', function ($query) {
                 $query->whereHas('roles', fn($query) => $query->where('name', 'Student'));
             })
-            // ->where('students.faculty_id', auth()->user()->operator->faculty_id)
-            // ->where('students.department_id', auth()->user()->operator->department_id)
             // * HANYA AMBIL MAHASISWA DENGAN STATUS STUDY PLANS PENDING
             ->whereHas('studyPlans', fn($query) => $query->where('status', StudyPlanStatus::PENDING->value))
             ->with(['user', 'classroom', 'feeGroup', 'studyPlans'])
             ->paginate(request()->load ?? 10);
-
-        // $faculty_name = auth()->user()->operator->faculty?->name;
-        // $department_name = auth()->user()->operator->department?->name;
 
         return inertia('Operators/ApproveStudyPlans/Index', [
             'page_settings' => [

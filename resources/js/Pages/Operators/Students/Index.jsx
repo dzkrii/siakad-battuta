@@ -15,6 +15,7 @@ import { Link } from '@inertiajs/react';
 import {
     IconArrowsDownUp,
     IconBooks,
+    IconClock,
     IconPencil,
     IconPlus,
     IconRefresh,
@@ -50,12 +51,26 @@ export default function Index(props) {
                     subtitle={props.page_settings.subtitle}
                     icon={IconUsers}
                 />
-                <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
-                    <Link href={route('operators.students.create')}>
-                        <IconPlus className="size-4" />
-                        Tambah
-                    </Link>
-                </Button>
+                <div className="flex w-full flex-col gap-2 lg:w-auto lg:flex-row">
+                    {/* Pending Study Plans Button */}
+                    <Button variant="purple" size="xl" className="w-full lg:w-auto" asChild>
+                        <Link
+                            href={route('operators.students.index', {
+                                pending_study_plans: !params.pending_study_plans,
+                            })}
+                        >
+                            <IconClock className="mr-2 size-4" />
+                            {params.pending_study_plans ? 'Semua Mahasiswa' : 'KRS Pending'}
+                        </Link>
+                    </Button>
+
+                    <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
+                        <Link href={route('operators.students.create')}>
+                            <IconPlus className="size-4" />
+                            Tambah
+                        </Link>
+                    </Button>
+                </div>
             </div>
             <Card>
                 <CardHeader className="mb-4 p-0">
@@ -91,8 +106,16 @@ export default function Index(props) {
                     {students.length === 0 ? (
                         <EmptyState
                             icon={IconUsers}
-                            title="Tidak ada mahasiswa"
-                            subtitle="Mulailah dengan membuat mahasiswa baru."
+                            title={
+                                params.pending_study_plans
+                                    ? 'Tidak ada mahasiswa dengan KRS pending'
+                                    : 'Tidak ada mahasiswa'
+                            }
+                            subtitle={
+                                params.pending_study_plans
+                                    ? 'Semua KRS mahasiswa sudah diproses.'
+                                    : 'Mulailah dengan membuat mahasiswa baru.'
+                            }
                         />
                     ) : (
                         <Table className="w-full">
@@ -135,18 +158,6 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    {/* <TableHead>
-                                        <Button
-                                            variant="ghost"
-                                            className="group inline-flex"
-                                            onClick={() => onSortable('fee_group_id')}
-                                        >
-                                            Golongan UKT
-                                            <span className="ml-2 flex-none rounded text-muted-foreground">
-                                                <IconArrowsDownUp className="size-4" />
-                                            </span>
-                                        </Button>
-                                    </TableHead> */}
                                     <TableHead>
                                         <Button
                                             variant="ghost"
@@ -183,18 +194,6 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    {/* <TableHead>
-                                        <Button
-                                            variant="ghost"
-                                            className="group inline-flex"
-                                            onClick={() => onSortable('created_at')}
-                                        >
-                                            Dibuat Pada
-                                            <span className="ml-2 flex-none rounded text-muted-foreground">
-                                                <IconArrowsDownUp className="size-4" />
-                                            </span>
-                                        </Button>
-                                    </TableHead> */}
                                     <TableHead>Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -203,19 +202,13 @@ export default function Index(props) {
                                     <TableRow key={index}>
                                         <TableCell>{index + 1 + (meta.current_page - 1) * meta.per_page}</TableCell>
                                         <TableCell className="flex items-center gap-2">
-                                            {/* <Avatar>
-                                                <AvatarImage src={student.user.avatar} />
-                                                <AvatarFallback>{student.user.name.substring(0, 1)}</AvatarFallback>
-                                            </Avatar> */}
                                             <span>{student.user.name}</span>
                                         </TableCell>
                                         <TableCell>{student.user.email}</TableCell>
                                         <TableCell>{student.classroom?.name}</TableCell>
-                                        {/* <TableCell>{student.feeGroup?.group}</TableCell> */}
                                         <TableCell>{student.student_number}</TableCell>
                                         <TableCell className="text-center">{student.semester}</TableCell>
                                         <TableCell className="text-center">{student.batch}</TableCell>
-                                        {/* <TableCell>{formatDateIndo(student.created_at)}</TableCell> */}
                                         <TableCell>
                                             <div className="flex items-center gap-x-1">
                                                 <Button variant="purple" size="sm" asChild>
@@ -223,11 +216,6 @@ export default function Index(props) {
                                                         <IconBooks className="size-4" />
                                                     </Link>
                                                 </Button>
-                                                {/* <Button variant="green" size="sm" asChild>
-                                                    <Link href={route('operators.fees.index', [student])}>
-                                                        <IconMoneybag className="size-4" />
-                                                    </Link>
-                                                </Button> */}
                                                 <Button variant="yellow" size="sm" asChild>
                                                     <Link href={route('operators.study-results.index', [student])}>
                                                         <IconSchool className="size-4" />
