@@ -23,9 +23,9 @@ export default function Grades({ studyResult, grades, name = null }) {
                             <TableHead className="border text-center">KODE</TableHead>
                             <TableHead className="border text-center">MATAKULIAH</TableHead>
                             <TableHead className="border text-center">SKS</TableHead>
-                            <TableHead className="border text-center">HURUF MUTU</TableHead>
                             <TableHead className="border text-center">BOBOT</TableHead>
-                            <TableHead className="border text-center">NILAI</TableHead>
+                            <TableHead className="border text-center">HURUF MUTU</TableHead>
+                            {/* <TableHead className="border text-center">NILAI</TableHead> */}
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -35,9 +35,9 @@ export default function Grades({ studyResult, grades, name = null }) {
                                 <TableCell className="border text-center">{grade.course.kode_matkul}</TableCell>
                                 <TableCell className="border">{grade.course.name}</TableCell>
                                 <TableCell className="border text-center">{grade.course.credit}</TableCell>
-                                <TableCell className="border text-center">{grade.letter}</TableCell>
                                 <TableCell className="border text-center">{grade.weight_of_value}</TableCell>
-                                <TableCell className="border text-center">{grade.grade}</TableCell>
+                                <TableCell className="border text-center">{grade.letter}</TableCell>
+                                {/* <TableCell className="border text-center">{grade.grade}</TableCell> */}
                             </TableRow>
                         ))}
                     </TableBody>
