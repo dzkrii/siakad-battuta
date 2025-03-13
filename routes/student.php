@@ -5,6 +5,7 @@ use App\Http\Controllers\Student\FeeStudentController;
 use App\Http\Controllers\Student\ScheduleStudentController;
 use App\Http\Controllers\Student\StudyPlanPdfController;
 use App\Http\Controllers\Student\StudyPlanStudentController;
+use App\Http\Controllers\Student\StudyResultPdfController;
 use App\Http\Controllers\Student\StudyResultStudentController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,4 +27,5 @@ Route::prefix('students')->middleware(['auth', 'role:Student'])->group(function 
   Route::get('schedules', ScheduleStudentController::class)->name('students.schedules.index');
   Route::get('fees', FeeStudentController::class)->name('students.fees.index');
   Route::get('study-results', StudyResultStudentController::class)->name('students.study-results.index');
+  Route::get('study-results/download/{studyResult}', StudyResultPdfController::class)->name('students.study-results.download');
 });

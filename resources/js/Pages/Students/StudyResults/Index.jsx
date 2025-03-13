@@ -7,8 +7,7 @@ import { Button } from '@/Components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import StudentLayout from '@/Layouts/StudentLayout';
 import { formatDateIndo } from '@/lib/utils';
-import { Link } from '@inertiajs/react';
-import { IconPrinter, IconSchool } from '@tabler/icons-react';
+import { IconDownload, IconSchool } from '@tabler/icons-react';
 import { useState } from 'react';
 
 export default function Index(props) {
@@ -57,9 +56,12 @@ export default function Index(props) {
                                         <div className="flex items-center gap-x-1">
                                             <Grades studyResult={studyResult} grades={studyResult.grades} />
                                             <Button variant="green" size="sm" asChild>
-                                                <Link href="#">
-                                                    <IconPrinter className="size-4" />
-                                                </Link>
+                                                <a
+                                                    href={route('students.study-results.download', studyResult.id)}
+                                                    target="_blank"
+                                                >
+                                                    <IconDownload className="size-4" />
+                                                </a>
                                             </Button>
                                         </div>
                                     </TableCell>
