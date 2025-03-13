@@ -75,7 +75,7 @@ class StudyResultPdfController extends Controller implements HasMiddleware
             'Teknologi Informasi' => 'Aripin Rambe, S.Kom., M.Kom.',
             'Kewirausahaan' => 'Atika Aini Nasution, S.E., M.M.',
             'Akuntansi' => 'Fhikry Ahmad H. Srg., S.E., M.Ak.',
-            'Manajemen' => 'Amril, S.Kom., M.M.',
+            'Manajemen' => 'Amril, S.Kom., S.E., M.M.',
             'Hukum' => 'Junaidi Lubis, S.H., M.H.',
             'PGSD' => 'Nur Wahyuni, S.Pd., M.Pd.',
             'PGPAUD' => 'Putri Sari Ulfa, S.Pd., M.Pd.',

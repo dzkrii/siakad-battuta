@@ -39,7 +39,7 @@ export default function Index(props) {
                                 <TableHead>#</TableHead>
                                 <TableHead>Tahun Ajaran</TableHead>
                                 <TableHead>Semester</TableHead>
-                                <TableHead>GPA</TableHead>
+                                <TableHead>IPS</TableHead>
                                 <TableHead>Dibuat Pada</TableHead>
                                 <TableHead>Aksi</TableHead>
                             </TableRow>

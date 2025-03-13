@@ -205,8 +205,10 @@
                 <td class="equal-width"><strong>{{ $totalT }}</strong></td>
             </tr>
             <tr>
-                <td colspan="5" style="text-align: center;"><strong>Indeks Prestasi (IP)</strong></td>
-                <td colspan="2" style="text-align: center;"><strong>{{ $studyResult->gpa }}</strong></td>
+                <td colspan="5" style="text-align: center;"><strong>Indeks Prestasi Semester (IPS)</strong></td>
+                <td colspan="2" style="text-align: center;">
+                    <strong>{{ number_format($studyResult->gpa, 2, '.', '') }}</strong>
+                </td>
             </tr>
         </tbody>
     </table>

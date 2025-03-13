@@ -11,14 +11,23 @@ import UseFilter from '@/hooks/UseFilter.';
 import AppLayout from '@/Layouts/AppLayout';
 import { flashMessage } from '@/lib/utils';
 import { useForm } from '@inertiajs/react';
-import { IconCalculator, IconCheck, IconDoor, IconFileUpload, IconRefresh, IconUsers } from '@tabler/icons-react';
-import { useState } from 'react';
+import {
+    IconCalculator,
+    IconCheck,
+    IconDoor,
+    IconEdit,
+    IconFileUpload,
+    IconRefresh,
+    IconUsers,
+} from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function Index(props) {
     const students = props.students;
 
     const [params, setParams] = useState(props.state);
+    const [editMode, setEditMode] = useState(false);
 
     UseFilter({
         route: route('teachers.classrooms.index', [props.course, props.classroom]),
@@ -32,17 +41,55 @@ export default function Index(props) {
         _method: props.page_settings.method,
     });
 
+    // Pre-populate form data when edit mode is activated
+    useEffect(() => {
+        if (editMode) {
+            const initialGrades = [];
+
+            // Initialize grades for all students in edit mode
+            students.forEach((student) => {
+                // For each category, check if there's existing data and add it to the initial form data
+                ['tugas', 'uts', 'uas'].forEach((category) => {
+                    const existingGrade = getGradeStudent(student.id, student.grades, category, null);
+                    if (existingGrade) {
+                        initialGrades.push({
+                            student_id: student.id,
+                            course_id: props.course.id,
+                            classroom_id: props.classroom.id,
+                            category: category,
+                            section: null,
+                            grade: existingGrade.grade,
+                        });
+                    }
+                });
+            });
+
+            setData('grades', initialGrades);
+        } else {
+            // Clear form data when exiting edit mode
+            reset();
+        }
+    }, [editMode]);
+
     const onHandleSubmit = (e) => {
         e.preventDefault();
-        post(props.page_settings.action, {
-            preserveScroll: true,
-            preserveState: true,
-            onSuccess: (success) => {
-                const flash = flashMessage(success);
-                if (flash) toast[flash.type](flash.message);
-                reset();
-            },
-        });
+        if (data.grades.length > 0 || data.attendances.length > 0) {
+            const confirmMessage = 'Apakah Anda yakin ingin menyimpan perubahan nilai?';
+            if (confirm(confirmMessage)) {
+                post(props.page_settings.action, {
+                    preserveScroll: true,
+                    preserveState: true,
+                    onSuccess: (success) => {
+                        const flash = flashMessage(success);
+                        if (flash) toast[flash.type](flash.message);
+                        reset();
+                        setEditMode(false);
+                    },
+                });
+            }
+        } else {
+            toast.warning('Tidak ada perubahan yang disimpan');
+        }
     };
 
     const isAttendanceChecked = (attendances, studentId, section) => {
@@ -104,6 +151,10 @@ export default function Index(props) {
         );
     };
 
+    const toggleEditMode = () => {
+        setEditMode(!editMode);
+    };
+
     return (
         <div className="flex w-full flex-col pb-32">
             <div className="mb-8 flex flex-col items-start justify-between gap-y-4 lg:flex-row lg:items-center">
@@ -113,19 +164,30 @@ export default function Index(props) {
                     icon={IconDoor}
                 />
 
-                <Button
-                    variant="blue"
-                    onClick={() =>
-                        (window.location.href = route('teachers.classrooms.import.index', [
-                            props.course.id,
-                            props.classroom.id,
-                        ]))
-                    }
-                    className="flex items-center gap-2"
-                >
-                    <IconFileUpload className="size-4" />
-                    Import Excel
-                </Button>
+                <div className="flex gap-2">
+                    <Button
+                        variant={editMode ? 'green' : 'blue'}
+                        onClick={toggleEditMode}
+                        className="flex items-center gap-2"
+                    >
+                        <IconEdit className="size-4" />
+                        {editMode ? 'Mode Edit Aktif' : 'Edit Nilai'}
+                    </Button>
+
+                    <Button
+                        variant="blue"
+                        onClick={() =>
+                            (window.location.href = route('teachers.classrooms.import.index', [
+                                props.course.id,
+                                props.classroom.id,
+                            ]))
+                        }
+                        className="flex items-center gap-2"
+                    >
+                        <IconFileUpload className="size-4" />
+                        Import Excel
+                    </Button>
+                </div>
             </div>
             <Card>
                 <CardHeader className="mb-4 p-0">
@@ -142,11 +204,20 @@ export default function Index(props) {
                         </Button>
                     </div>
                     <div className="space-y-4 px-6">
-                        <Alert variant="destructive">
-                            <AlertDescription>
-                                Harap isi dengan teliti, data yang sudah disimpan tidak dapat diperbarui
-                            </AlertDescription>
-                        </Alert>
+                        {editMode ? (
+                            <Alert>
+                                <AlertDescription>
+                                    Mode edit aktif. Anda dapat mengubah nilai yang sudah disimpan. Jangan lupa klik
+                                    "Simpan" setelah selesai mengedit.
+                                </AlertDescription>
+                            </Alert>
+                        ) : (
+                            <Alert variant="destructive">
+                                <AlertDescription>
+                                    Harap isi dengan teliti, pastikan Anda memeriksa nilai sebelum menyimpan
+                                </AlertDescription>
+                            </Alert>
+                        )}
                         {errors && Object.keys(errors).length > 0 && (
                             <Alert variant="red">
                                 <AlertDescription>
@@ -233,12 +304,6 @@ export default function Index(props) {
                                             <TableCell className="border text-center">{index + 1}</TableCell>
                                             <TableCell className="border">
                                                 <div className="flex items-center gap-2">
-                                                    {/* <Avatar>
-                                                        <AvatarImage src={student.user.avatar} />
-                                                        <AvatarFallback>
-                                                            {student.user.name.substring(0, 1)}
-                                                        </AvatarFallback>
-                                                    </Avatar> */}
                                                     <span>{student.user.name}</span>
                                                 </div>
                                             </TableCell>
@@ -282,7 +347,8 @@ export default function Index(props) {
 
                                             {/* Array Tugas */}
                                             <TableCell className="border text-center">
-                                                {getGradeStudent(student.id, student.grades, 'tugas', null) ? (
+                                                {getGradeStudent(student.id, student.grades, 'tugas', null) &&
+                                                !editMode ? (
                                                     getGradeStudent(student.id, student.grades, 'tugas', null).grade
                                                 ) : (
                                                     <Input
@@ -304,7 +370,8 @@ export default function Index(props) {
 
                                             {/* UTS */}
                                             <TableCell className="border text-center">
-                                                {getGradeStudent(student.id, student.grades, 'uts', null) ? (
+                                                {getGradeStudent(student.id, student.grades, 'uts', null) &&
+                                                !editMode ? (
                                                     getGradeStudent(student.id, student.grades, 'uts', null).grade
                                                 ) : (
                                                     <Input
@@ -326,7 +393,8 @@ export default function Index(props) {
 
                                             {/* UAS */}
                                             <TableCell className="border text-center">
-                                                {getGradeStudent(student.id, student.grades, 'uas', null) ? (
+                                                {getGradeStudent(student.id, student.grades, 'uas', null) &&
+                                                !editMode ? (
                                                     getGradeStudent(student.id, student.grades, 'uas', null).grade
                                                 ) : (
                                                     <Input
@@ -388,15 +456,6 @@ export default function Index(props) {
                                                 type="button"
                                                 size="lg"
                                                 onClick={() => {
-                                                    console.log('Tombol Hitung Nilai Akhir diklik');
-                                                    console.log(
-                                                        'URL:',
-                                                        route('teachers.classrooms.calculate', [
-                                                            props.course.id,
-                                                            props.classroom.id,
-                                                        ]),
-                                                    );
-
                                                     if (
                                                         confirm('Apakah Anda yakin ingin menghitung semua nilai akhir?')
                                                     ) {

@@ -98,80 +98,9 @@ class CourseClassroomController extends Controller
             'students' => CourseStudentClassroomResource::collection($students),
             'state' => [
                 'search' => request()->search ?? '',
-                // 'search' => request()->search ?? '',
-                // 'load' => 10,
             ],
         ]);
     }
-
-    // public function calculateGPA(int $studentId)
-    // {
-    //     $student = Student::query()
-    //         ->where('id', $studentId)
-    //         ->first();
-
-    //     $studyResult = StudyResult::query()
-    //         ->where('student_id', $student->id)
-    //         ->where('academic_year_id', activeAcademicYear()->id)
-    //         ->where('semester', $student->semester)
-    //         ->first();
-
-    //     if (!$studyResult) {
-    //         Log::error("❌ Study result not found for student ID: $studentId");
-    //         return 0;
-    //     }
-
-    //     $studyResultGrades = StudyResultGrade::query()
-    //         ->where('study_result_id', $studyResult->id)
-    //         ->get();
-
-    //     Log::info("📊 Calculating GPA for student ID: $studentId");
-    //     Log::info("Total study results: " . $studyResultGrades->count());
-
-    //     $totalScore = 0;
-    //     $totalWeight = 0;
-
-    //     foreach ($studyResultGrades as $grade) {
-    //         // Ambil jumlah SKS dari tabel course
-    //         $course = $grade->course ?? null;
-    //         $sks = $course ? $course->credit : 0;
-
-    //         if ($sks == 0) {
-    //             Log::warning("⚠️ SKS not found for Grade ID: {$grade->id}");
-    //             continue;
-    //         }
-
-    //         $finalScore = min($grade->grade, 100);
-    //         $gpaScore = ($finalScore / 100) * 4;
-    //         // $gpaScore = $this->convertScoreToGPA($finalScore);
-    //         $weight = $grade->weight_of_value;
-
-    //         Log::info("📌 Grade ID: {$grade->id}, Final Score: $finalScore, GPA Score: $gpaScore, SKS: $sks");
-
-    //         $totalScore += $gpaScore * $sks;
-    //         $totalWeight += $sks;
-    //     }
-
-    //     // if ($totalWeight > 0) {
-    //     //     $gpa = min(round($totalScore / $totalWeight, 2), 4);
-    //     //     Log::info("✅ Final GPA for Student ID $studentId: $gpa");
-    //     //     return min(round($totalScore / $totalWeight, 2), 4);
-    //     // }
-
-    //     if ($totalWeight == 0) {
-    //         Log::warning("⚠️ Total weight is 0, returning GPA = 0 for Student ID $studentId");
-    //         return 0;
-    //     }
-
-    //     // Log::warning("⚠️ Total weight is 0, returning GPA = 0 for Student ID $studentId");
-
-    //     // return 0;
-
-    //     $gpa = min(round($totalScore / $totalWeight, 2), 4);
-    //     Log::info("✅ Final GPA for Student ID $studentId: $gpa");
-
-    //     return $gpa;
-    // }
 
     public function calculateGPA(int $studentId)
     {
@@ -286,8 +215,36 @@ class CourseClassroomController extends Controller
                 ->whereIn('student_id', $studentIds)
                 ->get();
 
-            Attendance::insert($attendances);
-            Grade::insert($grades);
+            // Process attendances (these are only inserted, not updated)
+            if (!empty($attendances)) {
+                Attendance::insert($attendances);
+            }
+
+            // Handle grades separately to support updating
+            foreach ($grades as $gradeData) {
+                // Check if this grade already exists
+                $existingGrade = Grade::where([
+                    'student_id' => $gradeData['student_id'],
+                    'course_id' => $gradeData['course_id'],
+                    'classroom_id' => $gradeData['classroom_id'],
+                    'category' => $gradeData['category'],
+                    'section' => $gradeData['section'],
+                ])->first();
+
+                if ($existingGrade) {
+                    // Update existing grade
+                    $existingGrade->update([
+                        'grade' => $gradeData['grade'],
+                        'updated_at' => Carbon::now(),
+                    ]);
+
+                    Log::info("Updated grade {$existingGrade->id} for student {$gradeData['student_id']} in {$gradeData['category']} from {$existingGrade->getOriginal('grade')} to {$gradeData['grade']}");
+                } else {
+                    // Insert new grade
+                    Grade::create($gradeData);
+                    Log::info("Created new grade for student {$gradeData['student_id']} in {$gradeData['category']}");
+                }
+            }
 
             $studyResult->each(function ($result) use ($course, $classroom) {
                 $final_score = $this->calculateFinalScore(
@@ -327,10 +284,11 @@ class CourseClassroomController extends Controller
 
             DB::commit();
 
-            flashMessage('Berhasil melakukan perubahan');
+            flashMessage('Berhasil menyimpan perubahan nilai');
             return to_route('teachers.classrooms.index', [$course, $classroom]);
         } catch (Throwable $e) {
             DB::rollBack();
+            Log::error("Error syncing grades: " . $e->getMessage());
             flashMessage(MessageType::ERROR->message(error: $e->getMessage()), 'error');
             return to_route('teachers.classrooms.index', [$course, $classroom]);
         }
