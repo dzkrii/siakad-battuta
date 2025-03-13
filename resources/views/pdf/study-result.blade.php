@@ -177,9 +177,9 @@
             <tr>
                 <th class="no-column" rowspan="2">NO</th>
                 <th colspan="2">MATA KULIAH</th>
+                <th class="equal-width" rowspan="2">SKS</th>
                 <th class="equal-width" rowspan="2">H</th>
                 <th class="equal-width" rowspan="2">A</th>
-                <th class="equal-width" rowspan="2">SKS</th>
                 <th class="equal-width" rowspan="2">T</th>
             </tr>
             <tr>
@@ -193,20 +193,21 @@
                     <td class="no-column">{{ $index + 1 }}</td>
                     <td class="code-column">{{ $grade->course->kode_matkul }}</td>
                     <td class="name-column" style="text-align: left;">{{ $grade->course->name }}</td>
+                    <td class="equal-width">{{ $grade->course->credit }}</td>
                     <td class="equal-width">{{ $grade->letter }}</td>
                     <td class="equal-width">{{ $grade->weight_of_value }}</td>
-                    <td class="equal-width">{{ $grade->course->credit }}</td>
                     <td class="equal-width">{{ $grade->weight_of_value * $grade->course->credit }}</td>
                 </tr>
             @endforeach
             <tr>
-                <td colspan="5" style="text-align: center;"><strong>Jumlah</strong></td>
+                <td colspan="3" style="text-align: center;"><strong>Jumlah</strong></td>
                 <td class="equal-width"><strong>{{ $totalSks }}</strong></td>
+                <td colspan="2"></td>
                 <td class="equal-width"><strong>{{ $totalT }}</strong></td>
             </tr>
             <tr>
-                <td colspan="5" style="text-align: center;"><strong>Indeks Prestasi Semester (IPS)</strong></td>
-                <td colspan="2" style="text-align: center;">
+                <td colspan="6" style="text-align: center;"><strong>Indeks Prestasi Semester (IPS)</strong></td>
+                <td colspan="1" style="text-align: center;">
                     <strong>{{ number_format($studyResult->gpa, 2, '.', '') }}</strong>
                 </td>
             </tr>
