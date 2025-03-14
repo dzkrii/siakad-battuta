@@ -26,6 +26,7 @@ use Throwable;
 class CourseClassroomController extends Controller
 {
     use CalculatesFinalScore;
+
     public function index(Course $course, Classroom $classroom): Response
     {
         $schedule = Schedule::query()
@@ -88,7 +89,7 @@ class CourseClassroomController extends Controller
 
         return inertia('Teachers/Classrooms/Index', [
             'page_settings' => [
-                'title' => "Kelas {$classroom->name} - Mata kuliah {$course->name}",
+                'title' => "Kelas {$classroom->name} - {$course->name}",
                 'subtitle' => 'Menampilkan data mahasiswa',
                 'method' => 'PUT',
                 'action' => route('teachers.classrooms.sync', [$course, $classroom]),
@@ -102,185 +103,137 @@ class CourseClassroomController extends Controller
         ]);
     }
 
-    public function calculateGPA(int $studentId)
+    /**
+     * Calculate GPA for a student
+     * 
+     * @param int $studentId
+     * @return float
+     */
+    private function calculateGPA(int $studentId): float
     {
-        $student = Student::query()
-            ->where('id', $studentId)
-            ->first();
+        $student = Student::find($studentId);
 
         if (!$student) {
-            Log::error("❌ Student not found for ID: $studentId");
+            Log::error("Student not found for ID: $studentId");
             return 0;
         }
 
-        $studyResult = StudyResult::query()
-            ->where('student_id', $student->id)
+        $studyResult = StudyResult::where('student_id', $student->id)
             ->where('academic_year_id', activeAcademicYear()->id)
             ->where('semester', $student->semester)
             ->first();
 
         if (!$studyResult) {
-            Log::error("❌ Study result not found for student ID: $studentId");
+            Log::error("Study result not found for student ID: $studentId");
             return 0;
         }
 
-        $studyResultGrades = StudyResultGrade::query()
-            ->where('study_result_id', $studyResult->id)
-            ->with('course') // Eager load course untuk efisiensi
+        $studyResultGrades = StudyResultGrade::where('study_result_id', $studyResult->id)
+            ->with('course')
             ->get();
-
-        Log::info("📊 Calculating GPA for student ID: $studentId");
-        Log::info("Total study results: " . $studyResultGrades->count());
 
         $totalScore = 0;
         $totalWeight = 0;
 
         foreach ($studyResultGrades as $grade) {
-            // Ambil jumlah SKS dari tabel course
-            $course = $grade->course ?? null;
+            $course = $grade->course;
 
             if (!$course || $course->credit <= 0) {
-                Log::warning("⚠️ Course not found or SKS is zero for Grade ID: {$grade->id}");
                 continue;
             }
 
             $sks = $course->credit;
             $finalScore = min($grade->grade, 100);
-
-            // Gunakan fungsi convertScoreToGPA yang sudah ada di trait
             $gpaScore = $this->convertScoreToGPA($finalScore);
-
-            Log::info("📌 Grade ID: {$grade->id}, Course: {$course->name}, Final Score: $finalScore, GPA Score: $gpaScore, SKS: $sks");
 
             $totalScore += $gpaScore * $sks;
             $totalWeight += $sks;
         }
 
         if ($totalWeight <= 0) {
-            Log::warning("⚠️ Total credit weight is 0, returning GPA = 0 for Student ID $studentId");
             return 0;
         }
 
-        $gpa = min(round($totalScore / $totalWeight, 2), 4);
-        Log::info("✅ Final GPA for Student ID $studentId: $gpa (total score: $totalScore, total weight: $totalWeight)");
-
-        return $gpa;
+        return min(round($totalScore / $totalWeight, 2), 4);
     }
 
-    public function updateGPA(int $studentId)
+    /**
+     * Update GPA for a student
+     * 
+     * @param int $studentId
+     * @return void
+     */
+    private function updateGPA(int $studentId): void
     {
-        $student = Student::query()
-            ->where('id', $studentId)
-            ->first();
+        $gpa = $this->calculateGPA($studentId);
 
-        $gpa = $this->calculateGPA($student->id);
-
-        $studyResult = StudyResult::query()
-            ->where('student_id', $student->id)
+        StudyResult::where('student_id', $studentId)
             ->where('academic_year_id', activeAcademicYear()->id)
-            ->where('semester', $student->semester)
-            ->first();
-
-        if ($studyResult) {
-            $studyResult->update([
-                'gpa' => $gpa,
-            ]);
-        }
+            ->where('semester', function ($query) use ($studentId) {
+                $query->select('semester')
+                    ->from('students')
+                    ->where('id', $studentId);
+            })
+            ->update(['gpa' => $gpa]);
     }
 
+    /**
+     * Sync attendance and grades, then calculate final scores
+     * 
+     * @param Course $course
+     * @param Classroom $classroom
+     * @param CourseClassroomRequest $request
+     * @return RedirectResponse
+     */
     public function sync(Course $course, Classroom $classroom, CourseClassroomRequest $request): RedirectResponse
     {
         try {
             DB::beginTransaction();
 
-            $attendances = array_map(function ($attendance) {
-                $attendance['created_at'] = Carbon::now();
-                $attendance['updated_at'] = Carbon::now();
-                return $attendance;
-            }, $request->attendances);
+            // Process attendances
+            $attendances = [];
+            foreach ($request->attendances as $attendance) {
+                $attendances[] = array_merge($attendance, [
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
 
-            $grades = array_map(function ($grade) {
-                $grade['created_at'] = Carbon::now();
-                $grade['updated_at'] = Carbon::now();
-                return $grade;
-            }, $request->grades);
-
-            $studentIds = collect($attendances)
-                ->pluck('student_id')
-                ->merge(collect($grades)->pluck('student_id'))
-                ->unique()
-                ->values();
-
-            $studyResult = StudyResult::query()
-                ->whereIn('student_id', $studentIds)
-                ->get();
-
-            // Process attendances (these are only inserted, not updated)
             if (!empty($attendances)) {
                 Attendance::insert($attendances);
             }
 
-            // Handle grades separately to support updating
-            foreach ($grades as $gradeData) {
-                // Check if this grade already exists
-                $existingGrade = Grade::where([
-                    'student_id' => $gradeData['student_id'],
-                    'course_id' => $gradeData['course_id'],
-                    'classroom_id' => $gradeData['classroom_id'],
-                    'category' => $gradeData['category'],
-                    'section' => $gradeData['section'],
-                ])->first();
-
-                if ($existingGrade) {
-                    // Update existing grade
-                    $existingGrade->update([
-                        'grade' => $gradeData['grade'],
-                        'updated_at' => Carbon::now(),
-                    ]);
-
-                    Log::info("Updated grade {$existingGrade->id} for student {$gradeData['student_id']} in {$gradeData['category']} from {$existingGrade->getOriginal('grade')} to {$gradeData['grade']}");
-                } else {
-                    // Insert new grade
-                    Grade::create($gradeData);
-                    Log::info("Created new grade for student {$gradeData['student_id']} in {$gradeData['category']}");
-                }
-            }
-
-            $studyResult->each(function ($result) use ($course, $classroom) {
-                $final_score = $this->calculateFinalScore(
-                    attendancePercentage: (
-                        $this->calculateAttendancePercentage(
-                            $this->getAttendanceCount($result->student_id, $course->id, $classroom->id)
-                        )
-                    ),
-                    taskPercentage: (
-                        $this->calculateTaskPercentage(
-                            $this->getGradeCount($result->student_id, $course->id, $classroom->id, 'tugas')
-                        )
-                    ),
-                    utsPercentage: (
-                        $this->calculateUTSPercentage(
-                            $this->getGradeCount($result->student_id, $course->id, $classroom->id, 'uts')
-                        )
-                    ),
-                    uasPercentage: (
-                        $this->calculateUASPercentage(
-                            $this->getGradeCount($result->student_id, $course->id, $classroom->id, 'uas')
-                        )
-                    )
-                );
-
-                $grades = StudyResultGrade::updateOrCreate([
-                    'study_result_id' => $result->id,
-                    'course_id' => $course->id,
-                ], [
-                    'grade' => $final_score,
-                    'letter' => getLetterGrade($final_score),
-                    'weight_of_value' => $this->getWeight(getLetterGrade($final_score)),
+            // Process grades
+            foreach ($request->grades as $gradeData) {
+                $gradeData = array_merge($gradeData, [
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
 
-                $this->updateGPA($result->student_id);
-            });
+                Grade::updateOrCreate(
+                    [
+                        'student_id' => $gradeData['student_id'],
+                        'course_id' => $gradeData['course_id'],
+                        'classroom_id' => $gradeData['classroom_id'],
+                        'category' => $gradeData['category'],
+                        'section' => $gradeData['section'],
+                    ],
+                    [
+                        'grade' => $gradeData['grade'],
+                        'updated_at' => now(),
+                    ]
+                );
+            }
+
+            // Get all affected students
+            $studentIds = collect($request->attendances)
+                ->pluck('student_id')
+                ->merge(collect($request->grades)->pluck('student_id'))
+                ->unique()
+                ->values();
+
+            // Calculate final scores for all affected students
+            $this->calculateFinalScores($course, $classroom, $studentIds);
 
             DB::commit();
 
@@ -294,89 +247,49 @@ class CourseClassroomController extends Controller
         }
     }
 
-    public function calculateAll(Course $course, Classroom $classroom)
+    /**
+     * Calculate final scores for students
+     * 
+     * @param Course $course
+     * @param Classroom $classroom
+     * @param Collection $studentIds
+     * @return void
+     */
+    private function calculateFinalScores(Course $course, Classroom $classroom, $studentIds): void
     {
-        Log::info("calculateAll method dipanggil untuk course {$course->id} dan classroom {$classroom->id}");
-        try {
-            DB::beginTransaction();
+        $studyResults = StudyResult::whereIn('student_id', $studentIds)->get();
 
-            $schedule = Schedule::query()
-                ->where('course_id', $course->id)
-                ->where('classroom_id', $classroom->id)
-                ->first();
+        foreach ($studyResults as $result) {
+            $final_score = $this->calculateFinalScore(
+                attendancePercentage: $this->calculateAttendancePercentage(
+                    $this->getAttendanceCount($result->student_id, $course->id, $classroom->id)
+                ),
+                taskPercentage: $this->calculateTaskPercentage(
+                    $this->getGradeCount($result->student_id, $course->id, $classroom->id, 'tugas')
+                ),
+                utsPercentage: $this->calculateUTSPercentage(
+                    $this->getGradeCount($result->student_id, $course->id, $classroom->id, 'uts')
+                ),
+                uasPercentage: $this->calculateUASPercentage(
+                    $this->getGradeCount($result->student_id, $course->id, $classroom->id, 'uas')
+                )
+            );
 
-            $students = Student::query()
-                ->where('faculty_id', $classroom->faculty_id)
-                ->where('department_id', $classroom->department_id)
-                ->where('classroom_id', $classroom->id)
-                ->wherehas('user', function ($query) {
-                    $query->whereHas('roles', fn($query) => $query->where('name', 'Student'));
-                })
-                ->whereHas('studyPlans', function ($query) use ($schedule) {
-                    $query->where('academic_year_id', activeAcademicYear()->id)
-                        ->approved()
-                        ->whereHas('schedules', fn($query) => $query->where('schedule_id', $schedule->id));
-                })
-                ->get();
+            // Update study result grade
+            StudyResultGrade::updateOrCreate(
+                [
+                    'study_result_id' => $result->id,
+                    'course_id' => $course->id,
+                ],
+                [
+                    'grade' => $final_score,
+                    'letter' => getLetterGrade($final_score),
+                    'weight_of_value' => $this->getWeight(getLetterGrade($final_score)),
+                ]
+            );
 
-            Log::info("Calculating final scores for {$students->count()} students");
-
-            foreach ($students as $student) {
-                $studyResult = StudyResult::firstOrCreate([
-                    'student_id' => $student->id,
-                    'academic_year_id' => activeAcademicYear()->id,
-                    'semester' => $student->semester
-                ]);
-
-                $final_score = $this->calculateFinalScore(
-                    attendancePercentage: (
-                        $this->calculateAttendancePercentage(
-                            $this->getAttendanceCount($student->id, $course->id, $classroom->id)
-                        )
-                    ),
-                    taskPercentage: (
-                        $this->calculateTaskPercentage(
-                            $this->getGradeCount($student->id, $course->id, $classroom->id, 'tugas')
-                        )
-                    ),
-                    utsPercentage: (
-                        $this->calculateUTSPercentage(
-                            $this->getGradeCount($student->id, $course->id, $classroom->id, 'uts')
-                        )
-                    ),
-                    uasPercentage: (
-                        $this->calculateUASPercentage(
-                            $this->getGradeCount($student->id, $course->id, $classroom->id, 'uas')
-                        )
-                    )
-                );
-
-                StudyResultGrade::updateOrCreate(
-                    [
-                        'study_result_id' => $studyResult->id,
-                        'course_id' => $course->id,
-                    ],
-                    [
-                        'grade' => $final_score,
-                        'letter' => getLetterGrade($final_score),
-                        'weight_of_value' => $this->getWeight(getLetterGrade($final_score)),
-                    ]
-                );
-
-                $this->updateGPA($student->id);
-
-                Log::info("Calculated final score for student ID {$student->id}: {$final_score}");
-            }
-
-            DB::commit();
-
-            flashMessage('Perhitungan nilai akhir berhasil dilakukan');
-            return to_route('teachers.classrooms.index', [$course, $classroom]);
-        } catch (Throwable $e) {
-            DB::rollBack();
-            Log::error("Error calculating final scores: " . $e->getMessage());
-            flashMessage("Error: " . $e->getMessage(), 'error');
-            return to_route('teachers.classrooms.index', [$course, $classroom]);
+            // Update student GPA
+            $this->updateGPA($result->student_id);
         }
     }
 }

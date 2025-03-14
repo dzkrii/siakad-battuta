@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\Admin\StudentController;
 use App\Http\Controllers\Admin\TeacherController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\CourseImportController;
+use App\Http\Controllers\Admin\ScheduleImportController;
 
 Route::prefix('admin')->middleware(['auth', 'role:Admin'])->group(function () {
     Route::get('dashboard', DashboardAdminController::class)->name('admin.dashboard');
@@ -122,6 +124,16 @@ Route::prefix('admin')->middleware(['auth', 'role:Admin'])->group(function () {
         Route::get('schedules/edit/{schedule}', 'edit')->name('admin.schedules.edit');
         Route::put('schedules/edit/{schedule}', 'update')->name('admin.schedules.update');
         Route::delete('schedules/destroy/{schedule}', 'destroy')->name('admin.schedules.destroy');
+    });
+
+    Route::controller(CourseImportController::class)->group(function () {
+        Route::get('courses/import/template', 'downloadTemplate')->name('admin.courses.import.template');
+        Route::post('courses/import', 'import')->name('admin.courses.import');
+    });
+
+    Route::controller(ScheduleImportController::class)->group(function () {
+        Route::get('schedules/import/template', 'downloadTemplate')->name('admin.schedules.import.template');
+        Route::post('schedules/import', 'import')->name('admin.schedules.import');
     });
 
     Route::get('fees', FeeController::class)->name('admin.fees.index');

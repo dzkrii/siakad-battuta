@@ -1,6 +1,7 @@
 import AlertAction from '@/Components/AlertAction';
 import EmptyState from '@/Components/EmptyState';
 import HeaderTitle from '@/Components/HeaderTitle';
+import ImportModal from '@/Components/ImportModal'; // Import the new component
 import PaginationTable from '@/Components/PaginationTable';
 import ShowFilter from '@/Components/ShowFilter';
 import { Button } from '@/Components/ui/button';
@@ -12,12 +13,21 @@ import UseFilter from '@/hooks/UseFilter.';
 import AppLayout from '@/Layouts/AppLayout';
 import { deleteAction, formatDateIndo } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
-import { IconArrowsDownUp, IconCalendar, IconPencil, IconPlus, IconRefresh, IconTrash } from '@tabler/icons-react';
+import {
+    IconArrowsDownUp,
+    IconCalendar,
+    IconFileUpload,
+    IconPencil,
+    IconPlus,
+    IconRefresh,
+    IconTrash,
+} from '@tabler/icons-react';
 import { useState } from 'react';
 
 export default function Index(props) {
     const { data: schedules, meta, links } = props.schedules;
     const [params, setParams] = useState(props.state);
+    const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
     const onSortable = (field) => {
         setParams({
@@ -41,12 +51,23 @@ export default function Index(props) {
                     subtitle={props.page_settings.subtitle}
                     icon={IconCalendar}
                 />
-                <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
-                    <Link href={route('admin.schedules.create')}>
-                        <IconPlus className="size-4" />
-                        Tambah
-                    </Link>
-                </Button>
+                <div className="flex w-full flex-col gap-2 sm:flex-row lg:w-auto">
+                    <Button
+                        variant="blue"
+                        size="xl"
+                        className="w-full lg:w-auto"
+                        onClick={() => setIsImportModalOpen(true)}
+                    >
+                        <IconFileUpload className="mr-2 size-4" />
+                        Import
+                    </Button>
+                    <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
+                        <Link href={route('admin.schedules.create')}>
+                            <IconPlus className="size-4" />
+                            Tambah
+                        </Link>
+                    </Button>
+                </div>
             </div>
             <Card>
                 <CardHeader className="mb-4 p-0">
@@ -264,6 +285,16 @@ export default function Index(props) {
                     </div>
                 </CardFooter>
             </Card>
+
+            {/* Import Modal */}
+            <ImportModal
+                isOpen={isImportModalOpen}
+                onClose={() => setIsImportModalOpen(false)}
+                importRoute={route('admin.schedules.import')}
+                downloadTemplateRoute={route('admin.schedules.import.template')}
+                title="Import Jadwal"
+                description="Upload file Excel untuk mengimpor data jadwal. Pastikan format file sesuai dengan template."
+            />
         </div>
     );
 }
