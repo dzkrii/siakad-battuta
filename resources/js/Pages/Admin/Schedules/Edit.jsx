@@ -1,3 +1,5 @@
+import ClassroomSearchSelect from '@/Components/ClassroomSearchSelect'; // Import komponen baru
+import CourseSearchSelect from '@/Components/CourseSearchSelect'; // Import komponen baru
 import HeaderTitle from '@/Components/HeaderTitle';
 import InputError from '@/Components/InputError';
 import { Button } from '@/Components/ui/button';
@@ -23,6 +25,13 @@ export default function Edit(props) {
         quota: props.schedule.quota ?? 0,
         _method: props.page_settings.method,
     });
+
+    const options = props.courses.map((course) => ({
+        value: course.value,
+        label: course.label,
+        teacher: course.teacher,
+        department: course.department,
+    }));
 
     const onHandleChange = (e) => setData(e.target.name, e.target.value);
 
@@ -109,48 +118,25 @@ export default function Edit(props) {
                             </div>
                             <div className="col-span-2">
                                 <Label htmlFor="course_id">Mata Kuliah</Label>
-                                <Select
-                                    defaultValue={data.course_id}
-                                    onValueChange={(value) => setData('course_id', value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue>
-                                            {props.courses.find((course) => course.value == data.course_id)
-                                                ? `${props.courses.find((course) => course.value == data.course_id)?.label} - ${props.courses.find((course) => course.value == data.course_id)?.teacher}`
-                                                : 'Pilih mata kuliah'}
-                                        </SelectValue>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {props.courses.map((course, index) => (
-                                            <SelectItem key={index} value={course.value}>
-                                                {course.label} - {course.teacher} - {course.department}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.course_id && <InputError message={errors.course_id} />}
+                                {/* Ganti Select dengan CourseSearchSelect */}
+                                <CourseSearchSelect
+                                    options={options}
+                                    value={data.course_id}
+                                    onChange={(value) => setData('course_id', value)}
+                                    placeholder="Pilih mata kuliah"
+                                    error={errors.course_id}
+                                />
                             </div>
                             <div className="col-span-2">
                                 <Label htmlFor="classroom_id">Kelas</Label>
-                                <Select
-                                    defaultValue={data.classroom_id}
-                                    onValueChange={(value) => setData('classroom_id', value)}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue>
-                                            {props.classrooms.find((classroom) => classroom.value == data.classroom_id)
-                                                ?.label ?? 'Pilih kelas'}
-                                        </SelectValue>
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {props.classrooms.map((classroom, index) => (
-                                            <SelectItem key={index} value={classroom.value}>
-                                                {classroom.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.classroom_id && <InputError message={errors.classroom_id} />}
+                                {/* Ganti Select dengan ClassroomSearchSelect */}
+                                <ClassroomSearchSelect
+                                    options={props.classrooms}
+                                    value={data.classroom_id}
+                                    onChange={(value) => setData('classroom_id', value)}
+                                    placeholder="Pilih kelas"
+                                    error={errors.classroom_id}
+                                />
                             </div>
                             <div className="col-span-2">
                                 <Label htmlFor="start_time">Waktu Mulai</Label>
