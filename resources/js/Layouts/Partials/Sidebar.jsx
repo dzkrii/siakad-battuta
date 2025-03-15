@@ -2,6 +2,7 @@ import NavLink from '@/Components/NavLink';
 import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
 import { Link } from '@inertiajs/react';
 import {
+    IconArrowsUp,
     IconBooks,
     IconBuildingSkyscraper,
     IconCalendar,
@@ -112,6 +113,12 @@ export default function Sidebar({ auth, url }) {
                             active={url.startsWith('/admin/schedules')}
                             title="Jadwal"
                             icon={IconCalendar}
+                        />
+                        <NavLink
+                            url={route('admin.semester-management.index')}
+                            active={url.startsWith('/admin/semester-management')}
+                            title="Manajemen Semester"
+                            icon={IconArrowsUp}
                         />
 
                         <div className="px-3 py-2 text-xs font-medium text-white">Pembayaran</div>

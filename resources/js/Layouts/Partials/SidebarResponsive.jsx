@@ -1,5 +1,6 @@
 import NavLink from '@/Components/NavLink';
 import {
+    IconArrowsUp,
     IconBooks,
     IconBuildingSkyscraper,
     IconCalendar,
@@ -94,6 +95,12 @@ export default function SidebarResponsive({ auth, url }) {
                             active={url.startsWith('/admin/schedules')}
                             title="Jadwal"
                             icon={IconCalendar}
+                        />
+                        <NavLink
+                            url={route('admin.semester-management.index')}
+                            active={url.startsWith('/admin/semester-management')}
+                            title="Manajemen Semester"
+                            icon={IconArrowsUp}
                         />
 
                         <div className="px-3 py-2 text-xs font-medium text-white">Pembayaran</div>
