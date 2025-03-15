@@ -181,7 +181,7 @@ export default function Create() {
                                                         handleCheckboxChange(
                                                             checked,
                                                             schedule.id,
-                                                            schedule.course.credits,
+                                                            schedule.course.credit,
                                                         );
                                                     }}
                                                 />
@@ -200,7 +200,7 @@ export default function Create() {
                                                     </span>
                                                 </div>
                                             </TableCell>
-                                            <TableCell>{schedule.course.credits || '-'}</TableCell>
+                                            <TableCell>{schedule.course.credit || '-'}</TableCell>
                                             <TableCell>
                                                 <Badge
                                                     variant={
