@@ -229,7 +229,6 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
             ->where('faculty_id', $student->faculty_id)
             ->where('department_id', $student->department_id)
             ->where('classroom_id', $student->classroom_id)
-            ->where('academic_year_id', activeAcademicYear()->id)
             ->with(['course', 'classroom'])
             ->withCount([
                 'studyPlans as taken_quota' => function ($query) {
