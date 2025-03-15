@@ -350,6 +350,6 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
         $pdf->setPaper('A4', 'potrait');
 
         // Return PDF as a download
-        return $pdf->stream('KRS_' . auth()->user()->name . '_' . $studyPlan->academicYear->semester . '.pdf');
+        return $pdf->stream('KRS_' . auth()->user()->name . '.pdf');
     }
 }
