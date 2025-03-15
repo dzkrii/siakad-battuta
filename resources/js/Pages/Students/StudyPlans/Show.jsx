@@ -91,8 +91,10 @@ export default function Show(props) {
                             </div>
                             <div>
                                 <p className="text-sm text-muted-foreground">Mahasiswa</p>
-                                <p className="font-medium">{studyPlan.student?.name || 'N/A'}</p>
-                                <p className="text-xs text-muted-foreground">NIM: {studyPlan.student?.nim || 'N/A'}</p>
+                                <p className="font-medium">{studyPlan.student.name || 'N/A'}</p>
+                                <p className="text-xs text-muted-foreground">
+                                    NIM: {studyPlan.student?.student_number || 'N/A'}
+                                </p>
                             </div>
                         </div>
 

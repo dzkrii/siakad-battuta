@@ -95,7 +95,7 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
             'can_create_study_plan' => $canCreateStudyPlan && activeAcademicYear() !== null,
             'student' => [
                 'id' => $student->id,
-                'name' => $student->name,
+                'name' => $student->user?->name,
                 'nim' => $student->student_number,
                 'semester' => $student->semester,
                 'faculty_id' => $student->faculty_id,

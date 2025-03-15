@@ -15,6 +15,12 @@ class StudyPlanScheduleStudentResource extends JsonResource
             'status' => $this->status,
             'notes' => $this->notes,
             'created_at' => $this->created_at,
+            'student' => $this->whenLoaded('student', [
+                'id' => $this->student?->id,
+                'name' => $this->student?->user?->name,
+                'student_number' => $this->student?->student_number,
+                'semester' => $this->student?->semester,
+            ]),
             'academicYear' => $this->whenLoaded('academicYear', [
                 'id' => $this->academicYear?->id,
                 'name' => $this->academicYear?->name,
