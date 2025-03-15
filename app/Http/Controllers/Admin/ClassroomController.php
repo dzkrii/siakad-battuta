@@ -28,7 +28,7 @@ class ClassroomController extends Controller implements HasMiddleware
     public function index(): Response
     {
         $classrooms = Classroom::query()
-            ->select(['id', 'faculty_id', 'department_id', 'academic_year_id', 'name', 'slug', 'created_at'])
+            ->select(['id', 'faculty_id', 'department_id', 'academic_year_id', 'semester', 'name', 'slug', 'created_at'])
             ->filter(request()->only(['search']))
             ->sorting(request()->only(['field', 'direction']))
             ->with(['faculty', 'department', 'academicYear'])
@@ -69,6 +69,7 @@ class ClassroomController extends Controller implements HasMiddleware
                 'value' => $item->id,
                 'label' => $item->name,
             ]),
+            'academic_year' => activeAcademicYear(),
         ]);
     }
 
@@ -79,6 +80,7 @@ class ClassroomController extends Controller implements HasMiddleware
                 'faculty_id' => $request->faculty_id,
                 'department_id' => $request->department_id,
                 'academic_year_id' => activeAcademicYear()->id,
+                'semester' => $request->semester,
                 'name' => $request->name,
             ]);
 
@@ -108,6 +110,7 @@ class ClassroomController extends Controller implements HasMiddleware
                 'value' => $item->id,
                 'label' => $item->name,
             ]),
+            'academic_year' => activeAcademicYear(),
         ]);
     }
 
@@ -117,6 +120,7 @@ class ClassroomController extends Controller implements HasMiddleware
             $classroom->update([
                 'faculty_id' => $request->faculty_id,
                 'department_id' => $request->department_id,
+                'semester' => $request->semester,
                 'name' => $request->name,
             ]);
 

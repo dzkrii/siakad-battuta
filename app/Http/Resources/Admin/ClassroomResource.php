@@ -18,6 +18,7 @@ class ClassroomResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'slug' => $this->slug,
+            'semester' => $this->semester, // Added semester field
             'created_at' => $this->created_at,
             'faculty' => $this->whenLoaded('faculty', [
                 'id' => $this->faculty?->id,

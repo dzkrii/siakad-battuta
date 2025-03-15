@@ -18,6 +18,7 @@ class Classroom extends Model
         'department_id',
         'academic_year_id',
         'name',
+        'semester',
         'slug',
     ];
 

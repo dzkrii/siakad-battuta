@@ -30,6 +30,12 @@ class ClassroomRequest extends FormRequest
                 'required',
                 'exists:departments,id',
             ],
+            'semester' => [
+                'required',
+                'integer',
+                'min:1',
+                'max:12',
+            ],
             'name' => [
                 'required',
                 'string',
@@ -44,6 +50,7 @@ class ClassroomRequest extends FormRequest
         return [
             'faculty_id' => 'Fakultas',
             'department_id' => 'Program Studi',
+            'semester' => 'Semester',
             'name' => 'Nama',
         ];
     }

@@ -16,6 +16,7 @@ export default function Edit(props) {
         faculty_id: props.classroom.faculty_id ?? null,
         department_id: props.classroom.department_id ?? null,
         academic_year_id: props.academic_year.name,
+        semester: props.classroom.semester ? props.classroom.semester.toString() : '',
         name: props.classroom.name ?? '',
         _method: props.page_settings.method,
     });
@@ -36,6 +37,9 @@ export default function Edit(props) {
     };
 
     const onHandleReset = () => reset();
+
+    // Generate semester options (1-8 for S1, adjust as needed)
+    const semesterOptions = Array.from({ length: 8 }, (_, i) => i + 1);
 
     return (
         <div className="flex w-full flex-col pb-32">
@@ -103,6 +107,25 @@ export default function Edit(props) {
                                 {errors.department_id && <InputError message={errors.department_id} />}
                             </div>
                             <div className="col-span-full">
+                                <Label htmlFor="semester">Semester</Label>
+                                <Select
+                                    defaultValue={data.semester}
+                                    onValueChange={(value) => setData('semester', value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Pilih semester" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {semesterOptions.map((semester) => (
+                                            <SelectItem key={semester} value={semester.toString()}>
+                                                Semester {semester}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.semester && <InputError message={errors.semester} />}
+                            </div>
+                            <div className="col-span-full">
                                 <Label htmlFor="academic_year_id">Tahun Ajaran</Label>
                                 <Input
                                     id="academic_year_id"
@@ -124,6 +147,9 @@ export default function Edit(props) {
                                     onChange={onHandleChange}
                                     placeholder="Masukkan nama kelas"
                                 />
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Format yang disarankan: [Kode Prodi]-[Semester]-[Waktu/Kelas] (contoh: IF-4-PAGI)
+                                </p>
                                 {errors.name && <InputError message={errors.name} />}
                             </div>
                         </div>

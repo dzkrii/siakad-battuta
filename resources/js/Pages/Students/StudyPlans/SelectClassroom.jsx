@@ -1,61 +1,168 @@
-import { Head, useForm, usePage } from '@inertiajs/react';
+import HeaderTitle from '@/Components/HeaderTitle';
+import { Button } from '@/Components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card';
+import { Label } from '@/Components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/Components/ui/radio-group';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
+import StudentLayout from '@/Layouts/StudentLayout';
+import { cn, flashMessage } from '@/lib/utils';
+import { Link, useForm, usePage } from '@inertiajs/react';
+import { IconArrowBack, IconSchool } from '@tabler/icons-react';
+import { toast } from 'sonner';
 
 export default function SelectClassroom() {
-    // Ambil data dari controller
-    const { page_settings, classrooms } = usePage().props;
+    // Get data from controller
+    const { page_settings, classrooms, current_classroom, can_change_classroom } = usePage().props;
 
     // Inertia form handling
     const { data, setData, post, processing, errors } = useForm({
-        classroom_id: '',
+        classroom_id: current_classroom ? current_classroom.id : '',
     });
 
     // Handle form submission
     const handleSubmit = (e) => {
         e.preventDefault();
-        post(page_settings.action);
+        post(page_settings.action, {
+            preserveScroll: true,
+            onSuccess: (success) => {
+                const flash = flashMessage(success);
+                if (flash) toast[flash.type](flash.message);
+            },
+        });
     };
 
     return (
-        <div className="container mx-auto p-4">
-            <Head>
-                <title>{page_settings.title}</title>
-            </Head>
+        <div className="flex w-full flex-col pb-32">
+            <div className="mb-8 flex flex-col items-start justify-between gap-y-4 lg:flex-row lg:items-center">
+                <HeaderTitle title={page_settings.title} subtitle={page_settings.subtitle} icon={IconSchool} />
+                <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
+                    <Link href={route('students.study-plans.index')}>
+                        <IconArrowBack className="size-4" />
+                        Kembali
+                    </Link>
+                </Button>
+            </div>
 
-            <h1 className="mb-4 text-2xl font-bold">{page_settings.title}</h1>
-            <p className="mb-6">{page_settings.subtitle}</p>
-
-            <h1>Keterangan Contoh Kelas :</h1>
-            <h2>IF-1-PAGI = Informatika Semester 1 Kelas Pagi</h2>
-
-            <form onSubmit={handleSubmit} className="mb-4 rounded bg-white px-8 pb-8 pt-6 shadow-md">
-                {classrooms.map((classroom) => (
-                    <div key={classroom.id} className="mb-4">
-                        <label className="inline-flex items-center">
-                            <input
-                                type="radio"
-                                name="classroom_id"
-                                value={classroom.id}
-                                checked={data.classroom_id === classroom.id}
-                                onChange={(e) => setData('classroom_id', e.target.value)}
-                                className="form-radio h-5 w-5 text-blue-600"
-                            />
-                            <span className="ml-2">{classroom.name}</span>
-                        </label>
+            <Card className="mb-6">
+                <CardHeader>
+                    <CardTitle>Informasi Pemilihan Kelas</CardTitle>
+                    <CardDescription>
+                        Kelas yang ditampilkan hanya kelas yang sesuai dengan semester dan program studi Anda.
+                        {!can_change_classroom && current_classroom && (
+                            <div className="mt-2 font-medium text-amber-600">
+                                Anda tidak dapat mengubah kelas karena sudah memiliki KRS yang diajukan.
+                            </div>
+                        )}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div>
+                            <span className="text-sm font-medium">Format Kelas:</span>
+                            <p className="text-sm text-muted-foreground">[Kode Prodi]-[Semester]-[Waktu/Kelas]</p>
+                        </div>
+                        <div>
+                            <span className="text-sm font-medium">Contoh:</span>
+                            <p className="text-sm text-muted-foreground">
+                                IF-4-PAGI = Informatika Semester 4 Kelas Pagi
+                            </p>
+                        </div>
                     </div>
-                ))}
 
-                {errors.classroom_id && <div className="mb-4 text-sm text-red-500">{errors.classroom_id}</div>}
+                    {current_classroom && (
+                        <div className="mb-6 rounded-md bg-blue-50 p-4">
+                            <h3 className="font-medium text-blue-700">Kelas Saat Ini</h3>
+                            <p className="text-blue-600">{current_classroom.name}</p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
 
-                <div className="flex items-center justify-between">
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
-                    >
-                        {processing ? 'Memproses...' : 'Pilih Kelas'}
-                    </button>
+            {can_change_classroom ? (
+                <form onSubmit={handleSubmit}>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Daftar Kelas Tersedia</CardTitle>
+                            <CardDescription>Pilih kelas yang sesuai dengan jadwal Anda</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {classrooms.length === 0 ? (
+                                <div className="p-8 text-center">
+                                    <p className="text-muted-foreground">
+                                        Tidak ada kelas yang tersedia untuk semester Anda.
+                                    </p>
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    <RadioGroup
+                                        value={data.classroom_id}
+                                        onValueChange={(value) => setData('classroom_id', value)}
+                                        className="flex flex-col space-y-2"
+                                    >
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead className="w-[100px]">Pilih</TableHead>
+                                                    <TableHead>Nama Kelas</TableHead>
+                                                    <TableHead>Fakultas</TableHead>
+                                                    <TableHead>Program Studi</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {classrooms.map((classroom) => (
+                                                    <TableRow
+                                                        key={classroom.id}
+                                                        className={cn(
+                                                            current_classroom &&
+                                                                current_classroom.id === classroom.id &&
+                                                                'bg-blue-50',
+                                                        )}
+                                                    >
+                                                        <TableCell>
+                                                            <RadioGroupItem
+                                                                value={classroom.id}
+                                                                id={`classroom-${classroom.id}`}
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Label
+                                                                htmlFor={`classroom-${classroom.id}`}
+                                                                className="cursor-pointer font-medium"
+                                                            >
+                                                                {classroom.name}
+                                                            </Label>
+                                                        </TableCell>
+                                                        <TableCell>{classroom.faculty_name}</TableCell>
+                                                        <TableCell>{classroom.department_name}</TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </RadioGroup>
+
+                                    {errors.classroom_id && (
+                                        <div className="mt-2 text-sm text-red-500">{errors.classroom_id}</div>
+                                    )}
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <div className="mt-8 flex justify-end">
+                        <Button type="submit" disabled={processing || classrooms.length === 0} variant="blue" size="xl">
+                            {processing ? 'Memproses...' : current_classroom ? 'Ubah Kelas' : 'Pilih Kelas'}
+                        </Button>
+                    </div>
+                </form>
+            ) : (
+                <div className="mt-6 flex justify-end">
+                    <Button variant="blue" size="xl" asChild>
+                        <Link href={route('students.study-plans.create')}>Lanjut ke Pengajuan KRS</Link>
+                    </Button>
                 </div>
-            </form>
+            )}
         </div>
     );
 }
+
+SelectClassroom.layout = (page) => <StudentLayout children={page} title={page.props.page_settings.title} />;
