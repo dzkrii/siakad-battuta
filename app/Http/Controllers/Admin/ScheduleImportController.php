@@ -11,7 +11,7 @@ use App\Models\Classroom;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Models\AcademicYear;
-use App\Enums\ScheduleDay; // Import the enum
+use App\Enums\ScheduleDay;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -258,14 +258,17 @@ class ScheduleImportController extends Controller
       ->select('teachers.id', 'users.name as teacher_name')
       ->get();
 
-    // Get course data with teacher information
+    // Get course data with teacher information and department
     $courses = Course::join('teachers', 'courses.teacher_id', '=', 'teachers.id')
       ->join('users', 'teachers.user_id', '=', 'users.id')
+      ->join('departments', 'courses.department_id', '=', 'departments.id')
       ->select(
         'courses.id',
         'courses.kode_matkul',
         'courses.name as course_name',
-        'users.name as teacher_name'
+        'users.name as teacher_name',
+        'departments.name as department_name',
+        'courses.department_id'
       )
       ->get();
 
@@ -298,64 +301,68 @@ class ScheduleImportController extends Controller
       $row++;
     }
 
-    // Add course reference data with teacher name
+    // Add course reference data with teacher name and department
     $refSheet->setCellValue('G1', 'Mata Kuliah');
     $refSheet->setCellValue('G2', 'ID');
     $refSheet->setCellValue('H2', 'Kode');
     $refSheet->setCellValue('I2', 'Nama Mata Kuliah');
     $refSheet->setCellValue('J2', 'Dosen Pengampu');
-    $refSheet->setCellValue('K2', 'Nama Format Lengkap');
+    $refSheet->setCellValue('K2', 'Program Studi');
+    $refSheet->setCellValue('L2', 'Department ID');
+    $refSheet->setCellValue('M2', 'Format Lengkap');
     $row = 3;
     foreach ($courses as $course) {
       $refSheet->setCellValue('G' . $row, $course->id);
       $refSheet->setCellValue('H' . $row, $course->kode_matkul);
       $refSheet->setCellValue('I' . $row, $course->course_name);
       $refSheet->setCellValue('J' . $row, $course->teacher_name);
-      $refSheet->setCellValue('K' . $row, $course->course_name . ' - ' . $course->teacher_name);
+      $refSheet->setCellValue('K' . $row, $course->department_name);
+      $refSheet->setCellValue('L' . $row, $course->department_id);
+      $refSheet->setCellValue('M' . $row, $course->course_name . ' - ' . $course->teacher_name . ' - ' . $course->department_name);
       $row++;
     }
 
     // Add classroom reference data
-    $refSheet->setCellValue('M1', 'Kelas');
-    $refSheet->setCellValue('M2', 'ID');
-    $refSheet->setCellValue('N2', 'Nama');
+    $refSheet->setCellValue('O1', 'Kelas');
+    $refSheet->setCellValue('O2', 'ID');
+    $refSheet->setCellValue('P2', 'Nama');
     $row = 3;
     foreach ($classrooms as $classroom) {
-      $refSheet->setCellValue('M' . $row, $classroom->id);
-      $refSheet->setCellValue('N' . $row, $classroom->name);
+      $refSheet->setCellValue('O' . $row, $classroom->id);
+      $refSheet->setCellValue('P' . $row, $classroom->name);
       $row++;
     }
 
     // Add academic year reference data
-    $refSheet->setCellValue('P1', 'Tahun Ajaran');
-    $refSheet->setCellValue('P2', 'ID');
-    $refSheet->setCellValue('Q2', 'Nama');
+    $refSheet->setCellValue('R1', 'Tahun Ajaran');
+    $refSheet->setCellValue('R2', 'ID');
+    $refSheet->setCellValue('S2', 'Nama');
     $row = 3;
     foreach ($academicYears as $academicYear) {
-      $refSheet->setCellValue('P' . $row, $academicYear->id);
-      $refSheet->setCellValue('Q' . $row, $academicYear->name);
+      $refSheet->setCellValue('R' . $row, $academicYear->id);
+      $refSheet->setCellValue('S' . $row, $academicYear->name);
       $row++;
     }
 
     // Add day of week reference
-    $refSheet->setCellValue('S1', 'Hari');
-    $refSheet->setCellValue('S2', 'Input di Excel');
-    $refSheet->setCellValue('T2', 'Nilai di Database');
+    $refSheet->setCellValue('U1', 'Hari');
+    $refSheet->setCellValue('U2', 'Input di Excel');
+    $refSheet->setCellValue('V2', 'Nilai di Database');
     $row = 3;
     foreach ($this->daysOfWeek as $input => $dbValue) {
-      $refSheet->setCellValue('S' . $row, $input);
-      $refSheet->setCellValue('T' . $row, $dbValue);
+      $refSheet->setCellValue('U' . $row, $input);
+      $refSheet->setCellValue('V' . $row, $dbValue);
       $row++;
     }
 
     // Style reference sheet headers
-    $refSheet->getStyle('A1:T2')->getFont()->setBold(true);
-    $refSheet->getStyle('A1:T2')->getFill()
+    $refSheet->getStyle('A1:V2')->getFont()->setBold(true);
+    $refSheet->getStyle('A1:V2')->getFill()
       ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
       ->getStartColor()->setARGB('FFCCCCCC');
 
     // Autosize columns in reference sheet
-    foreach (range('A', 'T') as $column) {
+    foreach (range('A', 'V') as $column) {
       $refSheet->getColumnDimension($column)->setAutoSize(true);
     }
 
@@ -370,9 +377,13 @@ class ScheduleImportController extends Controller
       $courses->isNotEmpty() && $classrooms->isNotEmpty() &&
       $academicYears->isNotEmpty()
     ) {
+
+      // Use first course's department for the sample
+      $sampleCourse = $courses->first();
+
       $sheet->setCellValue('A2', $faculties->first()->id);
-      $sheet->setCellValue('B2', $departments->first()->id);
-      $sheet->setCellValue('C2', $courses->first()->id);
+      $sheet->setCellValue('B2', $sampleCourse->department_id); // Use matching department_id from the course
+      $sheet->setCellValue('C2', $sampleCourse->id);
       $sheet->setCellValue('D2', $classrooms->first()->id);
       $sheet->setCellValue('E2', $academicYears->first()->id);
       $sheet->setCellValue('F2', '08:00');
@@ -385,7 +396,7 @@ class ScheduleImportController extends Controller
     // Add comments with instructions
     $sheet->getComment('A2')->getText()->createTextRun('ID Fakultas. Lihat sheet "Reference Data" untuk daftar ID.');
     $sheet->getComment('B2')->getText()->createTextRun('ID Program Studi. Lihat sheet "Reference Data" untuk daftar ID.');
-    $sheet->getComment('C2')->getText()->createTextRun('ID Mata Kuliah. Lihat sheet "Reference Data" untuk daftar lengkap mata kuliah beserta dosen pengampunya.');
+    $sheet->getComment('C2')->getText()->createTextRun('ID Mata Kuliah. Lihat sheet "Reference Data" untuk daftar lengkap mata kuliah beserta dosen pengampu dan program studi.');
     $sheet->getComment('D2')->getText()->createTextRun('ID Kelas. Lihat sheet "Reference Data" untuk daftar ID.');
     $sheet->getComment('E2')->getText()->createTextRun('ID Tahun Ajaran. Lihat sheet "Reference Data" untuk daftar ID.');
     $sheet->getComment('H2')->getText()->createTextRun('Hari harus salah satu dari: SENIN, SELASA, RABU, KAMIS, JUMAT, SABTU, atau MINGGU.');
