@@ -52,11 +52,11 @@ if (!function_exists('getLetterGrade')) {
             return 'A';
         } elseif ($score >= 75) {
             return 'B+';
-        } elseif ($score >= 70) {
+        } elseif ($score >= 71) {
             return 'B';
-        } elseif ($score >= 65) {
+        } elseif ($score >= 56) {
             return 'C+';
-        } elseif ($score >= 55) {
+        } elseif ($score >= 51) {
             return 'C';
         } elseif ($score >= 40) {
             return 'D';
