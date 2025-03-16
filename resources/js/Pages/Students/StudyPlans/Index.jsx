@@ -2,6 +2,7 @@ import EmptyState from '@/Components/EmptyState';
 import HeaderTitle from '@/Components/HeaderTitle';
 import PaginationTable from '@/Components/PaginationTable';
 import ShowFilter from '@/Components/ShowFilter';
+import { Alert, AlertDescription, AlertTitle } from '@/Components/ui/alert';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card';
@@ -13,6 +14,7 @@ import StudentLayout from '@/Layouts/StudentLayout';
 import { formatDateIndo, STUDYPLANSTATUSVARIANT } from '@/lib/utils';
 import { Link, usePage } from '@inertiajs/react';
 import {
+    IconAlertCircle,
     IconArrowsDownUp,
     IconBuilding,
     IconDownload,
@@ -24,7 +26,8 @@ import {
 import { useState } from 'react';
 
 export default function Index() {
-    const { page_settings, studyPlans, state, can_create_study_plan, student } = usePage().props;
+    const { page_settings, studyPlans, state, can_create_study_plan, student, block_reason, semester_mismatch } =
+        usePage().props;
     const { data, meta, links } = studyPlans;
     const [params, setParams] = useState(state);
 
@@ -54,6 +57,20 @@ export default function Index() {
                                 Ajukan KRS
                             </Link>
                         </Button>
+                    ) : block_reason === 'KRS Sudah Diajukan' ? (
+                        <Button variant="outline" size="xl" className="w-full lg:w-auto" asChild disabled>
+                            <span>
+                                <IconPlus className="mr-1 size-4" />
+                                KRS Sudah Diajukan
+                            </span>
+                        </Button>
+                    ) : block_reason === 'Semester Tidak Sesuai' ? (
+                        <Button variant="red" size="xl" className="w-full lg:w-auto" asChild disabled>
+                            <span>
+                                <IconAlertCircle className="mr-1 size-4" />
+                                Hubungi Admin
+                            </span>
+                        </Button>
                     ) : student?.classroom_id ? (
                         <Button variant="outline" size="xl" className="w-full lg:w-auto" asChild disabled>
                             <span>
@@ -71,7 +88,6 @@ export default function Index() {
                     )}
                 </div>
             </div>
-
             {student && (
                 <Card className="mb-6">
                     <CardHeader>
@@ -107,7 +123,17 @@ export default function Index() {
                     </CardContent>
                 </Card>
             )}
-
+            {/* Peringatan semester tidak sesuai */}
+            {semester_mismatch && (
+                <Alert variant="destructive" className="mb-6">
+                    <IconAlertCircle className="h-4 w-4" />
+                    <AlertTitle>Semester Tidak Sesuai</AlertTitle>
+                    <AlertDescription>
+                        Anda belum mengajukan KRS untuk semester sebelumnya. Harap hubungi admin untuk bantuan pengajuan
+                        KRS.
+                    </AlertDescription>
+                </Alert>
+            )}
             <div className="flex flex-col gap-y-8">
                 {/* Filters */}
                 <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-center">

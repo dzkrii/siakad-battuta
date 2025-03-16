@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Student;
 
+use App\Enums\AcademicYearSemester;
 use App\Enums\MessageType;
 use App\Enums\StudyPlanStatus;
 use App\Http\Controllers\Controller;
@@ -37,17 +38,37 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
     public function index(): Response
     {
         $student = auth()->user()->student;
+        $activeAcademicYear = activeAcademicYear(); // Ini akan mengembalikan objek AcademicYear, bukan ID
+
+        // Cek kecocokan semester mahasiswa dengan active academic year
+        $isOddSemester = $student->semester % 2 == 1; // true jika semester ganjil
+
+        // Pastikan activeAcademicYear ada sebelum mengakses propertinya
+        $isOddAcademicYear = $activeAcademicYear && $activeAcademicYear->semester == AcademicYearSemester::ODD->value; // true jika academic year ganjil
+
+        $semesterMismatch = $isOddSemester !== $isOddAcademicYear;
+        $blockReason = null;
 
         // Get student information with relationships
         $studentInfo = $student->load(['faculty', 'department', 'classroom']);
 
         // Check if student can create a new study plan
-        $canCreateStudyPlan = !StudyPlan::query()
+        $existingStudyPlan = StudyPlan::query()
             ->where('student_id', $student->id)
-            ->where('academic_year_id', activeAcademicYear() ? activeAcademicYear()->id : null)
+            ->where('academic_year_id', $activeAcademicYear ? $activeAcademicYear->id : null)
             ->where('semester', $student->semester)
             ->whereIn('status', [StudyPlanStatus::PENDING, StudyPlanStatus::APPROVED])
             ->exists();
+
+        // Pengecekan apakah mahasiswa bisa buat KRS
+        $canCreateStudyPlan = !$existingStudyPlan && !$semesterMismatch && $activeAcademicYear !== null;
+
+        // Set block reason
+        if ($existingStudyPlan) {
+            $blockReason = 'KRS Sudah Diajukan';
+        } elseif ($semesterMismatch) {
+            $blockReason = 'Semester Tidak Sesuai';
+        }
 
         // Fetch study plans
         $studyPlans = StudyPlan::query()
@@ -92,7 +113,9 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
                 'field' => request()->field ?? 'created_at',
                 'direction' => request()->direction ?? 'desc',
             ],
-            'can_create_study_plan' => $canCreateStudyPlan && activeAcademicYear() !== null,
+            'can_create_study_plan' => $canCreateStudyPlan,
+            'block_reason' => $blockReason,
+            'semester_mismatch' => $semesterMismatch,
             'student' => [
                 'id' => $student->id,
                 'name' => $student->user?->name,
@@ -204,6 +227,19 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
             return back();
         }
 
+        $student = auth()->user()->student;
+        $studentSemester = $student->semester;
+        $activeAcademicYear = activeAcademicYear();
+
+        // Cek kecocokan semester mahasiswa dengan active academic year
+        $isOddSemester = $studentSemester % 2 == 1; // true jika semester ganjil
+        $isOddAcademicYear = $activeAcademicYear->semester === AcademicYearSemester::ODD->value; // true jika academic year ganjil
+
+        if ($isOddSemester !== $isOddAcademicYear) {
+            flashMessage('Anda belum mengajukan KRS untuk semester sebelumnya, harap hubungi admin.', 'error');
+            return to_route('students.study-plans.index');
+        }
+
         // Check if student has a classroom
         $student = auth()->user()->student;
         if (!$student->classroom_id) {
@@ -264,17 +300,31 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
             DB::beginTransaction();
 
             $student = auth()->user()->student;
+            $studentSemester = $student->semester;
+            $activeAcademicYear = activeAcademicYear();
+
+            // Cek kecocokan semester mahasiswa dengan active academic year
+            // Jika semester mahasiswa ganjil (1,3,5,7) tapi active academic year genap, tolak
+            // Jika semester mahasiswa genap (2,4,6,8) tapi active academic year ganjil, tolak
+            $isOddSemester = $studentSemester % 2 == 1; // true jika semester ganjil
+            $isOddAcademicYear = $activeAcademicYear->semester === AcademicYearSemester::ODD->value; // true jika academic year ganjil
+
+            if ($isOddSemester !== $isOddAcademicYear) {
+                DB::rollBack();
+                flashMessage('Anda belum mengajukan KRS untuk semester sebelumnya, harap hubungi admin.', 'error');
+                return to_route('students.study-plans.index');
+            }
 
             // Check for existing study plans
             $existingStudyPlan = StudyPlan::query()
                 ->where('student_id', $student->id)
-                ->where('semester', $student->semester)
+                ->where('semester', $studentSemester)
                 ->whereIn('status', [StudyPlanStatus::PENDING, StudyPlanStatus::APPROVED])
                 ->exists();
 
             if ($existingStudyPlan) {
                 DB::rollBack();
-                flashMessage('Anda sudah mengajukan kartu rencana studi untuk semester ini', 'warning');
+                flashMessage('Anda sudah mengajukan kartu rencana stadi semester ini', 'warning');
                 return to_route('students.study-plans.index');
             }
 
@@ -288,8 +338,8 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
             // Create study plan
             $studyPlan = StudyPlan::create([
                 'student_id' => $student->id,
-                'academic_year_id' => activeAcademicYear()->id,
-                'semester' => $student->semester,
+                'academic_year_id' => $activeAcademicYear->id,
+                'semester' => $studentSemester,
                 'status' => StudyPlanStatus::PENDING,
             ]);
 
