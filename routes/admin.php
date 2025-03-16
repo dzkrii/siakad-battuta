@@ -84,6 +84,7 @@ Route::prefix('admin')->middleware(['auth', 'role:Admin'])->group(function () {
         Route::get('students/edit/{student:student_number}', 'edit')->name('admin.students.edit');
         Route::put('students/edit/{student:student_number}', 'update')->name('admin.students.update');
         Route::delete('students/destroy/{student:student_number}', 'destroy')->name('admin.students.destroy');
+        Route::delete('/students/{student}/classroom')->name('students.remove-classroom');
     });
 
     // Admin Grades Management Routes

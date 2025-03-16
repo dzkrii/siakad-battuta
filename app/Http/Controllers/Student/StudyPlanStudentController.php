@@ -214,7 +214,6 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
         // Check for existing study plan in current semester
         $existingStudyPlan = StudyPlan::query()
             ->where('student_id', $student->id)
-            ->where('academic_year_id', activeAcademicYear()->id)
             ->where('semester', $student->semester)
             ->whereIn('status', [StudyPlanStatus::PENDING, StudyPlanStatus::APPROVED])
             ->exists();
@@ -269,7 +268,6 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
             // Check for existing study plans
             $existingStudyPlan = StudyPlan::query()
                 ->where('student_id', $student->id)
-                ->where('academic_year_id', activeAcademicYear()->id)
                 ->where('semester', $student->semester)
                 ->whereIn('status', [StudyPlanStatus::PENDING, StudyPlanStatus::APPROVED])
                 ->exists();

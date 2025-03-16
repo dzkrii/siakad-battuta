@@ -143,12 +143,12 @@ export default function Index() {
                         subtitle="Mulailah dengan membuat kartu rencana studi baru."
                     />
                 ) : (
-                    <Table className="w-full">
+                    <Table className="w-full border">
                         <TableHeader>
                             <TableRow>
-                                <TableHead>#</TableHead>
-                                <TableHead>Semester</TableHead>
-                                <TableHead>
+                                <TableHead className="border text-center">#</TableHead>
+                                <TableHead className="border text-center">Semester</TableHead>
+                                <TableHead className="border text-center">
                                     <Button
                                         variant="ghost"
                                         className="group inline-flex"
@@ -160,7 +160,7 @@ export default function Index() {
                                         </span>
                                     </Button>
                                 </TableHead>
-                                <TableHead>
+                                <TableHead className="border text-center">
                                     <Button
                                         variant="ghost"
                                         className="group inline-flex"
@@ -172,7 +172,7 @@ export default function Index() {
                                         </span>
                                     </Button>
                                 </TableHead>
-                                <TableHead>
+                                <TableHead className="border text-center">
                                     <Button
                                         variant="ghost"
                                         className="group inline-flex"
@@ -184,34 +184,36 @@ export default function Index() {
                                         </span>
                                     </Button>
                                 </TableHead>
-                                <TableHead>Aksi</TableHead>
+                                <TableHead className="border text-center">Aksi</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {data.map((studyPlan, index) => (
                                 <TableRow key={index}>
-                                    <TableCell>{index + 1 + (meta.current_page - 1) * meta.per_page}</TableCell>
-                                    <TableCell>Semester {studyPlan.semester}</TableCell>
-                                    <TableCell>{studyPlan.academicYear.name}</TableCell>
-                                    <TableCell>
+                                    <TableCell className="border text-center">
+                                        {index + 1 + (meta.current_page - 1) * meta.per_page}
+                                    </TableCell>
+                                    <TableCell className="border text-center">Semester {studyPlan.semester}</TableCell>
+                                    <TableCell className="border text-center">{studyPlan.academicYear.name}</TableCell>
+                                    <TableCell className="border text-center">
                                         <Badge variant={STUDYPLANSTATUSVARIANT[studyPlan.status]}>
                                             {studyPlan.status}
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{formatDateIndo(studyPlan.created_at)}</TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center gap-x-1">
+                                    <TableCell className="border text-center">
+                                        {formatDateIndo(studyPlan.created_at)}
+                                    </TableCell>
+                                    <TableCell className="border text-center align-middle">
+                                        <div className="flex items-center justify-center gap-x-1">
                                             <Button variant="blue" size="sm" asChild>
                                                 <Link href={route('students.study-plans.show', [studyPlan.id])}>
                                                     <IconEye className="size-4" />
                                                 </Link>
                                             </Button>
-                                            {studyPlan.status === 'APPROVED' && (
+                                            {studyPlan.status === 'Approved' && (
                                                 <Button variant="green" size="sm" asChild>
                                                     <a
-                                                        href={route('students.study-plans.download-pdf', [
-                                                            studyPlan.id,
-                                                        ])}
+                                                        href={route('students.study-plans.download', [studyPlan.id])}
                                                         target="_blank"
                                                     >
                                                         <IconDownload className="size-4" />

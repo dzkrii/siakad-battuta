@@ -199,4 +199,13 @@ class StudentController extends Controller implements HasMiddleware
             return to_route('admin.students.index');
         }
     }
+
+    public function removeClassroom($studentId)
+    {
+        $student = Student::findOrFail($studentId);
+        $student->classroom_id = null;
+        $student->save();
+
+        return redirect()->back()->with('message', 'Kelas mahasiswa berhasil dihapus');
+    }
 }

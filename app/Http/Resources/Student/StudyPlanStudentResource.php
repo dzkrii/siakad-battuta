@@ -12,6 +12,7 @@ class StudyPlanStudentResource extends JsonResource
         return [
             'id' => $this->id,
             'status' => $this->status,
+            'semester' => $this->semester,
             'created_at' => $this->created_at,
             'student' => $this->whenLoaded('student', [
                 'id' => $this->student?->id,
