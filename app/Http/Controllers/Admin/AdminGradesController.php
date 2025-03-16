@@ -72,26 +72,9 @@ class AdminGradesController extends Controller
       ->first();
 
     if (!$studyResult) {
-      // Cari tahun akademik yang aktif tanpa menggunakan method active()
-      $academicYear = AcademicYear::where('is_active', 1)->first();
-
-      // Jika tidak ada tahun akademik aktif, gunakan yang terbaru
-      if (!$academicYear) {
-        $academicYear = AcademicYear::orderBy('id', 'desc')->first();
-
-        // Jika masih tidak ada, tampilkan pesan error yang informatif
-        if (!$academicYear) {
-          return redirect()->back()->with('error', 'Tidak ada tahun akademik yang tersedia');
-        }
-      }
-
-      // Create a new study result
-      $studyResult = new StudyResult();
-      $studyResult->student_id = $student->id;
-      $studyResult->academic_year_id = $academicYear->id;
-      $studyResult->semester = $semester;
-      // $studyResult->status = 'Aktif';
-      $studyResult->save();
+      // Instead of creating a new study result, redirect back with a message
+      flashMessage('Data nilai untuk semester ini belum tersedia', 'warning');
+      return redirect()->route('admin.students.grades.select-semester', $student);
     }
 
     // Get courses for this student in this semester (from study plans)
@@ -215,23 +198,29 @@ class AdminGradesController extends Controller
     try {
       DB::beginTransaction();
 
-      // Get or create study result for this semester
+      // Get study result for this semester
       $studyResult = StudyResult::where('student_id', $student->id)
         ->where('semester', $semester)
         ->first();
 
       if (!$studyResult) {
-        // Create a new study result if one doesn't exist
-        $academicYear = AcademicYear::active()->first();
+        // If study result doesn't exist, create a new one
+        $academicYear = AcademicYear::where('is_active', 1)->first();
+
+        // If no active academic year, use the latest one
         if (!$academicYear) {
-          throw new \Exception("Tidak ada tahun akademik aktif");
+          $academicYear = AcademicYear::orderBy('id', 'desc')->first();
+
+          if (!$academicYear) {
+            throw new \Exception("Tidak ada tahun akademik yang tersedia");
+          }
         }
 
         $studyResult = new StudyResult();
         $studyResult->student_id = $student->id;
         $studyResult->academic_year_id = $academicYear->id;
         $studyResult->semester = $semester;
-        $studyResult->status = 'Aktif';
+        // $studyResult->status = 'Aktif';
         $studyResult->save();
       }
 
@@ -283,10 +272,6 @@ class AdminGradesController extends Controller
         $studyResultGrade->weight_of_value = $this->getWeight(getLetterGrade($finalScore));
         $studyResultGrade->save();
       }
-
-      // Update total credits
-      // $studyResult->total_credit = $totalCredits;
-      // $studyResult->save();
 
       // Recalculate GPA
       $this->updateGPA($student->id, $semester);

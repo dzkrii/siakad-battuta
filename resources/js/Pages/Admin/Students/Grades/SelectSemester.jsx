@@ -35,6 +35,11 @@ export default function SelectSemester(props) {
         return overallGPA;
     };
 
+    // Check if study result exists for a semester
+    const hasStudyResult = (semester) => {
+        return studyResults.some((result) => result.semester === semester);
+    };
+
     return (
         <div className="flex w-full flex-col pb-32">
             <div className="mb-8 flex flex-col items-start justify-between gap-y-4 lg:flex-row lg:items-center">
@@ -98,6 +103,7 @@ export default function SelectSemester(props) {
                             {semesters.map((semester) => {
                                 const studyResult = studyResults.find((sr) => sr.semester === semester);
                                 const academicYear = studyResult?.academic_year?.name || 'Belum ada data';
+                                const hasData = hasStudyResult(semester);
 
                                 return (
                                     <div
@@ -105,7 +111,9 @@ export default function SelectSemester(props) {
                                         className="flex items-center justify-between rounded-md border p-3 transition-colors hover:bg-slate-50"
                                     >
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                                            <div
+                                                className={`flex h-10 w-10 items-center justify-center rounded-full ${hasData ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}
+                                            >
                                                 <IconSchool size={20} />
                                             </div>
                                             <div>
@@ -117,14 +125,20 @@ export default function SelectSemester(props) {
                                                 </p>
                                             </div>
                                         </div>
-                                        <Button asChild variant="blue">
+                                        <Button
+                                            asChild
+                                            variant={hasData ? 'blue' : 'outline'}
+                                            disabled={!hasData}
+                                            title={!hasData ? 'Data nilai semester ini belum tersedia' : ''}
+                                        >
                                             <Link
                                                 href={route('admin.students.grades.edit', [
                                                     student.student_number,
                                                     semester,
                                                 ])}
                                             >
-                                                Edit <IconChevronRight className="ml-1 size-4" />
+                                                {hasData ? 'Edit' : 'Belum Ada Data'}{' '}
+                                                <IconChevronRight className="ml-1 size-4" />
                                             </Link>
                                         </Button>
                                     </div>
