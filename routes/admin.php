@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AcademicYearController;
+use App\Http\Controllers\Admin\AdminGradesController;
 use App\Http\Controllers\Admin\ClassroomController;
 use App\Http\Controllers\Admin\ClassroomStudentController;
 use App\Http\Controllers\Admin\CourseController;
@@ -83,6 +84,13 @@ Route::prefix('admin')->middleware(['auth', 'role:Admin'])->group(function () {
         Route::get('students/edit/{student:student_number}', 'edit')->name('admin.students.edit');
         Route::put('students/edit/{student:student_number}', 'update')->name('admin.students.update');
         Route::delete('students/destroy/{student:student_number}', 'destroy')->name('admin.students.destroy');
+    });
+
+    // Admin Grades Management Routes
+    Route::controller(AdminGradesController::class)->group(function () {
+        Route::get('students/{student:student_number}/grades', 'selectSemester')->name('admin.students.grades.select-semester');
+        Route::get('students/{student:student_number}/grades/{semester}', 'edit')->name('admin.students.grades.edit');
+        Route::put('students/{student:student_number}/grades/{semester}', 'update')->name('admin.students.grades.update');
     });
 
     Route::controller(ClassroomStudentController::class)->group(function () {

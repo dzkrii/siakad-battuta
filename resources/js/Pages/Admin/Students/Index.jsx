@@ -15,12 +15,10 @@ import { deleteAction } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import {
     IconArrowsDownUp,
-    IconBuilding,
-    IconMoneybag,
     IconPencil,
     IconPlus,
     IconRefresh,
-    IconSchool,
+    IconReportAnalytics,
     IconTrash,
     IconUsers,
 } from '@tabler/icons-react';
@@ -161,7 +159,7 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    <TableHead>
+                                    {/* <TableHead>
                                         <Button
                                             variant="ghost"
                                             className="group inline-flex"
@@ -172,7 +170,7 @@ export default function Index(props) {
                                                 <IconArrowsDownUp className="size-4" />
                                             </span>
                                         </Button>
-                                    </TableHead>
+                                    </TableHead> */}
                                     <TableHead>
                                         <Button
                                             variant="ghost"
@@ -209,18 +207,6 @@ export default function Index(props) {
                                             </span>
                                         </Button>
                                     </TableHead>
-                                    {/* <TableHead>
-                                        <Button
-                                            variant="ghost"
-                                            className="group inline-flex"
-                                            onClick={() => onSortable('created_at')}
-                                        >
-                                            Dibuat Pada
-                                            <span className="ml-2 flex-none rounded text-muted-foreground">
-                                                <IconArrowsDownUp className="size-4" />
-                                            </span>
-                                        </Button>
-                                    </TableHead> */}
                                     <TableHead>Aksi</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -239,26 +225,18 @@ export default function Index(props) {
                                         <TableCell>{student.faculty.name}</TableCell>
                                         <TableCell>{student.department.name}</TableCell>
                                         <TableCell>{student.classroom?.name}</TableCell>
-                                        <TableCell>{student.feeGroup?.group}</TableCell>
+                                        {/* <TableCell>{student.feeGroup?.group}</TableCell> */}
                                         <TableCell>{student.student_number}</TableCell>
                                         <TableCell>{student.semester}</TableCell>
                                         <TableCell>{student.batch}</TableCell>
-                                        {/* <TableCell>{formatDateIndo(student.created_at)}</TableCell> */}
                                         <TableCell>
                                             <div className="flex items-center gap-x-1">
                                                 <Button variant="purple" size="sm" asChild>
-                                                    <Link href={route('operators.study-plans.index', [student])}>
-                                                        <IconBuilding className="size-4" />
-                                                    </Link>
-                                                </Button>
-                                                <Button variant="green" size="sm" asChild>
-                                                    <Link href={route('operators.fees.index', [student])}>
-                                                        <IconMoneybag className="size-4" />
-                                                    </Link>
-                                                </Button>
-                                                <Button variant="yellow" size="sm" asChild>
-                                                    <Link href={route('operators.study-results.index', [student])}>
-                                                        <IconSchool className="size-4" />
+                                                    <Link
+                                                        href={route('admin.students.grades.select-semester', [student])}
+                                                    >
+                                                        <IconReportAnalytics className="size-4" />
+                                                        Edit Nilai
                                                     </Link>
                                                 </Button>
                                                 <Button variant="blue" size="sm" asChild>

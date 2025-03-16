@@ -24,17 +24,44 @@ if (!function_exists('activeAcademicYear')) {
     }
 }
 
+// if (!function_exists('getLetterGrade')) {
+//     function getLetterGrade($grade): string
+//     {
+//         return match (true) {
+//             $grade >= 80 => 'A',
+//             $grade >= 75 => 'B+',
+//             $grade >= 71 => 'B',
+//             $grade >= 56 => 'C+',
+//             $grade >= 51 => 'C',
+//             $grade >= 40 => 'D',
+//             default => 'E',
+//         };
+//     }
+// }
+
 if (!function_exists('getLetterGrade')) {
-    function getLetterGrade($grade): string
+    /**
+     * Convert a numeric score to a letter grade.
+     *
+     * @param float $score The numeric score
+     * @return string The letter grade
+     */
+    function getLetterGrade(float $score): string
     {
-        return match (true) {
-            $grade >= 80 => 'A',
-            $grade >= 75 => 'B+',
-            $grade >= 71 => 'B',
-            $grade >= 56 => 'C+',
-            $grade >= 51 => 'C',
-            $grade >= 40 => 'D',
-            default => 'E',
-        };
+        if ($score >= 80) {
+            return 'A';
+        } elseif ($score >= 75) {
+            return 'B+';
+        } elseif ($score >= 70) {
+            return 'B';
+        } elseif ($score >= 65) {
+            return 'C+';
+        } elseif ($score >= 55) {
+            return 'C';
+        } elseif ($score >= 40) {
+            return 'D';
+        } else {
+            return 'E';
+        }
     }
 }
