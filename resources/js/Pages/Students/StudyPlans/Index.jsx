@@ -6,19 +6,31 @@ import { Alert, AlertDescription, AlertTitle } from '@/Components/ui/alert';
 import { Badge } from '@/Components/ui/badge';
 import { Button } from '@/Components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/Components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/Components/ui/dialog';
 import { Input } from '@/Components/ui/input';
+import { Label } from '@/Components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/Components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/Components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/Components/ui/table';
 import UseFilter from '@/hooks/UseFilter.';
 import StudentLayout from '@/Layouts/StudentLayout';
 import { formatDateIndo, STUDYPLANSTATUSVARIANT } from '@/lib/utils';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, useForm, usePage } from '@inertiajs/react';
 import {
     IconAlertCircle,
     IconArrowsDownUp,
     IconBuilding,
+    IconClock,
     IconDownload,
     IconEye,
+    IconHistory,
     IconPlus,
     IconRefresh,
     IconSchool,
@@ -26,10 +38,40 @@ import {
 import { useState } from 'react';
 
 export default function Index() {
-    const { page_settings, studyPlans, state, can_create_study_plan, student, block_reason, semester_mismatch } =
-        usePage().props;
+    const {
+        page_settings,
+        studyPlans,
+        state,
+        can_create_study_plan,
+        can_create_backdated_study_plan,
+        student,
+        block_reason,
+        semester_mismatch,
+        missed_semesters = [],
+        academic_years = [],
+    } = usePage().props;
+
     const { data, meta, links } = studyPlans;
     const [params, setParams] = useState(state);
+    const [backdatedDialogOpen, setBackdatedDialogOpen] = useState(false);
+
+    // Form for backdated KRS
+    const {
+        data: backdatedData,
+        setData: setBackdatedData,
+        post: postBackdated,
+        processing: backdatedProcessing,
+    } = useForm({
+        semester: missed_semesters.length > 0 ? missed_semesters[0] : '',
+        academic_year_id: academic_years.length > 0 ? academic_years[0].id : '',
+    });
+
+    const submitBackdatedForm = (e) => {
+        e.preventDefault();
+        postBackdated(route('students.study-plans.create-backdated'), {
+            preserveScroll: true,
+        });
+    };
 
     const onSortable = (field) => {
         setParams({
@@ -50,6 +92,7 @@ export default function Index() {
             <div className="mb-8 flex flex-col items-start justify-between gap-y-4 lg:flex-row lg:items-center">
                 <HeaderTitle title={page_settings.title} subtitle={page_settings.subtitle} icon={IconBuilding} />
                 <div className="flex w-full flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0 lg:w-auto">
+                    {/* Existing KRS Button Logic */}
                     {can_create_study_plan ? (
                         <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
                             <Link href={route('students.study-plans.create')}>
@@ -64,6 +107,80 @@ export default function Index() {
                                 KRS Sudah Diajukan
                             </span>
                         </Button>
+                    ) : block_reason === 'Semester Tidak Sesuai' && can_create_backdated_study_plan ? (
+                        <Dialog open={backdatedDialogOpen} onOpenChange={setBackdatedDialogOpen}>
+                            <DialogTrigger asChild>
+                                <Button variant="amber" size="xl" className="w-full lg:w-auto">
+                                    <IconHistory className="mr-1 size-4" />
+                                    Ajukan KRS Tertinggal
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-md">
+                                <DialogHeader>
+                                    <DialogTitle>Ajukan KRS Semester Tertinggal</DialogTitle>
+                                    <DialogDescription>
+                                        Pilih semester dan tahun ajaran untuk mengajukan KRS tertinggal
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <form onSubmit={submitBackdatedForm} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="semester">Semester</Label>
+                                        <RadioGroup
+                                            id="semester"
+                                            value={backdatedData.semester.toString()}
+                                            onValueChange={(value) => setBackdatedData('semester', value)}
+                                            className="flex flex-col space-y-2"
+                                        >
+                                            {missed_semesters.map((semester) => (
+                                                <div key={semester} className="flex items-center space-x-2">
+                                                    <RadioGroupItem
+                                                        id={`semester-${semester}`}
+                                                        value={semester.toString()}
+                                                    />
+                                                    <Label htmlFor={`semester-${semester}`} className="cursor-pointer">
+                                                        Semester {semester}{' '}
+                                                        {semester % 2 === 1 ? '(Ganjil)' : '(Genap)'}
+                                                    </Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="academic_year">Tahun Ajaran</Label>
+                                        <Select
+                                            value={backdatedData.academic_year_id}
+                                            onValueChange={(value) => setBackdatedData('academic_year_id', value)}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Pilih Tahun Ajaran" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {academic_years.map((year) => (
+                                                    <SelectItem key={year.id} value={year.id.toString()}>
+                                                        {year.name} - {year.semester === 'odd' ? 'Ganjil' : 'Genap'}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="mt-4 flex justify-end">
+                                        <Button
+                                            type="submit"
+                                            variant="blue"
+                                            disabled={
+                                                backdatedProcessing ||
+                                                !backdatedData.semester ||
+                                                !backdatedData.academic_year_id
+                                            }
+                                        >
+                                            {backdatedProcessing ? 'Memproses...' : 'Lanjutkan'}
+                                        </Button>
+                                    </div>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
                     ) : block_reason === 'Semester Tidak Sesuai' ? (
                         <Button variant="red" size="xl" className="w-full lg:w-auto" asChild disabled>
                             <span>
@@ -86,8 +203,86 @@ export default function Index() {
                             </Link>
                         </Button>
                     )}
+
+                    {/* Always show backdated KRS option if available and not already showing */}
+                    {can_create_backdated_study_plan && block_reason !== 'Semester Tidak Sesuai' && (
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="amber" size="xl" className="w-full lg:w-auto">
+                                    <IconClock className="mr-1 size-4" />
+                                    KRS Tertinggal
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-md">
+                                <DialogHeader>
+                                    <DialogTitle>Ajukan KRS Semester Tertinggal</DialogTitle>
+                                    <DialogDescription>
+                                        Pilih semester dan tahun ajaran untuk mengajukan KRS tertinggal
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <form onSubmit={submitBackdatedForm} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="semester">Semester</Label>
+                                        <RadioGroup
+                                            id="semester"
+                                            value={backdatedData.semester.toString()}
+                                            onValueChange={(value) => setBackdatedData('semester', value)}
+                                            className="flex flex-col space-y-2"
+                                        >
+                                            {missed_semesters.map((semester) => (
+                                                <div key={semester} className="flex items-center space-x-2">
+                                                    <RadioGroupItem
+                                                        id={`semester-${semester}`}
+                                                        value={semester.toString()}
+                                                    />
+                                                    <Label htmlFor={`semester-${semester}`} className="cursor-pointer">
+                                                        Semester {semester}{' '}
+                                                        {semester % 2 === 1 ? '(Ganjil)' : '(Genap)'}
+                                                    </Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="academic_year">Tahun Ajaran</Label>
+                                        <Select
+                                            value={backdatedData.academic_year_id}
+                                            onValueChange={(value) => setBackdatedData('academic_year_id', value)}
+                                        >
+                                            <SelectTrigger className="w-full">
+                                                <SelectValue placeholder="Pilih Tahun Ajaran" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {academic_years.map((year) => (
+                                                    <SelectItem key={year.id} value={year.id.toString()}>
+                                                        {year.name} - {year.semester === 'odd' ? 'Ganjil' : 'Genap'}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    <div className="mt-4 flex justify-end">
+                                        <Button
+                                            type="submit"
+                                            variant="blue"
+                                            disabled={
+                                                backdatedProcessing ||
+                                                !backdatedData.semester ||
+                                                !backdatedData.academic_year_id
+                                            }
+                                        >
+                                            {backdatedProcessing ? 'Memproses...' : 'Lanjutkan'}
+                                        </Button>
+                                    </div>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    )}
                 </div>
             </div>
+
             {student && (
                 <Card className="mb-6">
                     <CardHeader>
@@ -123,17 +318,45 @@ export default function Index() {
                     </CardContent>
                 </Card>
             )}
-            {/* Peringatan semester tidak sesuai */}
+
+            {/* Peringatan semester tidak sesuai dengan opsi KRS tertinggal */}
             {semester_mismatch && (
                 <Alert variant="destructive" className="mb-6">
                     <IconAlertCircle className="h-4 w-4" />
                     <AlertTitle>Semester Tidak Sesuai</AlertTitle>
                     <AlertDescription>
-                        Anda belum mengajukan KRS untuk semester sebelumnya. Harap hubungi admin untuk bantuan pengajuan
-                        KRS.
+                        Anda belum mengajukan KRS untuk semester sebelumnya.
+                        {can_create_backdated_study_plan ? (
+                            <span>
+                                {' '}
+                                Anda dapat menggunakan tombol <strong>Ajukan KRS Tertinggal</strong> untuk memulai
+                                pengisian KRS semester tertinggal.
+                            </span>
+                        ) : (
+                            <span> Harap hubungi admin untuk bantuan pengajuan KRS.</span>
+                        )}
                     </AlertDescription>
                 </Alert>
             )}
+
+            {/* Alert untuk menampilkan KRS tertinggal jika ada */}
+            {missed_semesters.length > 0 && !semester_mismatch && (
+                <Alert variant="warning" className="mb-6">
+                    <IconHistory className="h-4 w-4" />
+                    <AlertTitle>KRS Semester Tertinggal</AlertTitle>
+                    <AlertDescription>
+                        Anda memiliki {missed_semesters.length} semester yang belum diajukan KRS:{' '}
+                        {missed_semesters.map((sem, i) => (
+                            <span key={sem}>
+                                {i > 0 && ', '}
+                                Semester {sem}
+                            </span>
+                        ))}
+                        . Gunakan tombol <strong>KRS Tertinggal</strong> untuk mengisi KRS tersebut.
+                    </AlertDescription>
+                </Alert>
+            )}
+
             <div className="flex flex-col gap-y-8">
                 {/* Filters */}
                 <div className="flex w-full flex-col gap-4 lg:flex-row lg:items-center">

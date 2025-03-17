@@ -10,6 +10,7 @@ use App\Http\Requests\Student\StudyPlanStudentRequest;
 use App\Http\Resources\Admin\ScheduleResource;
 use App\Http\Resources\Student\StudyPlanScheduleStudentResource;
 use App\Http\Resources\Student\StudyPlanStudentResource;
+use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Schedule;
 use App\Models\StudyPlan;
@@ -44,7 +45,7 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
         $isOddSemester = $student->semester % 2 == 1; // true jika semester ganjil
 
         // Pastikan activeAcademicYear ada sebelum mengakses propertinya
-        $isOddAcademicYear = $activeAcademicYear && $activeAcademicYear->semester == AcademicYearSemester::ODD->value; // true jika academic year ganjil
+        $isOddAcademicYear = $activeAcademicYear && $activeAcademicYear->semester === 'Ganjil'; // true jika academic year ganjil
 
         $semesterMismatch = $isOddSemester !== $isOddAcademicYear;
         $blockReason = null;
@@ -52,7 +53,35 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
         // Get student information with relationships
         $studentInfo = $student->load(['faculty', 'department', 'classroom']);
 
-        // Check if student can create a new study plan
+        // Cek apakah ada KRS yang belum diajukan pada semester sebelumnya dan semester saat ini
+        $hasMissedPreviousSemester = false;
+        $missedSemesters = [];
+
+        // Loop dari semester 1 sampai semester saat ini untuk mencari semester yg terlewat
+        // Termasuk semester saat ini jika tidak sesuai dengan active academic year
+        $upperLimit = $semesterMismatch ? $student->semester + 1 : $student->semester;
+
+        for ($i = 1; $i < $upperLimit; $i++) {
+            // Jika ini semester saat ini dan tidak sesuai dengan academic year, tambahkan ke daftar
+            if ($i == $student->semester && $semesterMismatch) {
+                $hasMissedPreviousSemester = true;
+                $missedSemesters[] = $i;
+                continue;
+            }
+
+            // Cek KRS yang sudah ada
+            $existingKrs = StudyPlan::where('student_id', $student->id)
+                ->where('semester', $i)
+                ->whereIn('status', [StudyPlanStatus::PENDING, StudyPlanStatus::APPROVED])
+                ->exists();
+
+            if (!$existingKrs) {
+                $hasMissedPreviousSemester = true;
+                $missedSemesters[] = $i;
+            }
+        }
+
+        // Check if student can create a new study plan for current semester
         $existingStudyPlan = StudyPlan::query()
             ->where('student_id', $student->id)
             ->where('academic_year_id', $activeAcademicYear ? $activeAcademicYear->id : null)
@@ -63,12 +92,20 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
         // Pengecekan apakah mahasiswa bisa buat KRS
         $canCreateStudyPlan = !$existingStudyPlan && !$semesterMismatch && $activeAcademicYear !== null;
 
+        // Mahasiswa tetap bisa membuat KRS semester terlewat meskipun semester tidak sesuai
+        $canCreateBackdatedStudyPlan = $hasMissedPreviousSemester && $activeAcademicYear !== null;
+
         // Set block reason
         if ($existingStudyPlan) {
             $blockReason = 'KRS Sudah Diajukan';
-        } elseif ($semesterMismatch) {
+        } elseif ($semesterMismatch && !$hasMissedPreviousSemester) {
             $blockReason = 'Semester Tidak Sesuai';
         }
+
+        // Dapatkan semua tahun akademik untuk fitur backdated KRS
+        $academicYears = AcademicYear::orderBy('name', 'desc')
+            ->orderBy('semester', 'desc')
+            ->get();
 
         // Fetch study plans
         $studyPlans = StudyPlan::query()
@@ -114,8 +151,11 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
                 'direction' => request()->direction ?? 'desc',
             ],
             'can_create_study_plan' => $canCreateStudyPlan,
+            'can_create_backdated_study_plan' => $canCreateBackdatedStudyPlan,
             'block_reason' => $blockReason,
             'semester_mismatch' => $semesterMismatch,
+            'missed_semesters' => $missedSemesters,
+            'academic_years' => $academicYears,
             'student' => [
                 'id' => $student->id,
                 'name' => $student->user?->name,
@@ -129,6 +169,158 @@ class StudyPlanStudentController extends Controller implements HasMiddleware
                 'classroom_name' => $studentInfo->classroom ? $studentInfo->classroom->name : null,
             ],
         ]);
+    }
+
+    /**
+     * Show form for creating a backdated study plan
+     */
+    public function createBackdated(Request $request): Response | RedirectResponse
+    {
+        $request->validate([
+            'semester' => 'required|integer|min:1',
+            'academic_year_id' => 'required|exists:academic_years,id',
+        ]);
+
+        $student = auth()->user()->student;
+        $selectedSemester = (int) $request->semester;
+        $selectedAcademicYear = AcademicYear::findOrFail($request->academic_year_id);
+
+        // Cek apakah semester yang dipilih valid
+        $isOddSelectedSemester = $selectedSemester % 2 == 1;
+        $isOddAcademicYear = $selectedAcademicYear->semester === 'Ganjil';
+        $semesterMatchesYear = $isOddSelectedSemester === $isOddAcademicYear;
+
+        // Validasi: semester harus kurang dari semester saat ini ATAU
+        // harus sama dengan semester saat ini tapi tidak sesuai dengan active academic year
+        if (
+            $selectedSemester > $student->semester ||
+            ($selectedSemester == $student->semester && $semesterMatchesYear)
+        ) {
+            flashMessage('Semester yang dipilih tidak valid untuk KRS tertinggal', 'error');
+            return to_route('students.study-plans.index');
+        }
+
+        // Cek apakah sudah ada KRS untuk semester ini
+        $existingStudyPlan = StudyPlan::query()
+            ->where('student_id', $student->id)
+            ->where('semester', $selectedSemester)
+            ->whereIn('status', [StudyPlanStatus::PENDING, StudyPlanStatus::APPROVED])
+            ->exists();
+
+        if ($existingStudyPlan) {
+            flashMessage('Anda sudah mengajukan KRS untuk semester ' . $selectedSemester, 'warning');
+            return to_route('students.study-plans.index');
+        }
+
+        // Check if student has a classroom
+        if (!$student->classroom_id) {
+            // Redirect to classroom selection page
+            return to_route('students.study-plans.select-classroom');
+        }
+
+        // Get schedules for the backdated semester
+        // Catatan: Anda mungkin perlu menyesuaikan query ini berdasarkan bagaimana data jadwal Anda disimpan
+        $schedules = Schedule::query()
+            ->where('faculty_id', $student->faculty_id)
+            ->where('department_id', $student->department_id)
+            ->where('classroom_id', $student->classroom_id)
+            ->with(['course', 'classroom'])
+            ->withCount([
+                'studyPlans as taken_quota' => function ($query) use ($selectedAcademicYear) {
+                    $query->where('academic_year_id', $selectedAcademicYear->id);
+                }
+            ])
+            ->orderBy('day_of_week')
+            ->orderBy('start_time')
+            ->get();
+
+        if ($schedules->isEmpty()) {
+            flashMessage('Tidak ada jadwal yang tersedia untuk kelas Anda pada semester ' . $selectedSemester, 'warning');
+            return to_route('students.study-plans.index');
+        }
+
+        return inertia('Students/StudyPlans/CreateBackdated', [
+            'page_settings' => [
+                'title' => 'Tambah KRS Semester ' . $selectedSemester,
+                'subtitle' => 'Pengajuan KRS tertinggal untuk semester ' . $selectedSemester,
+                'method' => 'POST',
+                'action' => route('students.study-plans.store-backdated'),
+            ],
+            'schedules' => ScheduleResource::collection($schedules),
+            'current_classroom' => $student->classroom,
+            'selected_semester' => $selectedSemester,
+            'selected_academic_year' => $selectedAcademicYear,
+        ]);
+    }
+
+    /**
+     * Store a backdated study plan
+     */
+    public function storeBackdated(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'schedule_id' => 'required|array',
+            'schedule_id.*' => 'exists:schedules,id',
+            'semester' => 'required|integer|min:1',
+            'academic_year_id' => 'required|exists:academic_years,id',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $student = auth()->user()->student;
+            $selectedSemester = (int) $request->semester;
+            $selectedAcademicYear = AcademicYear::findOrFail($request->academic_year_id);
+
+            // Cek apakah semester yang dipilih valid
+            $isOddSelectedSemester = $selectedSemester % 2 == 1;
+            $isOddAcademicYear = $selectedAcademicYear->semester === 'Ganjil';
+            $semesterMatchesYear = $isOddSelectedSemester === $isOddAcademicYear;
+
+            // Validasi: semester harus kurang dari semester saat ini ATAU
+            // harus sama dengan semester saat ini tapi tidak sesuai dengan active academic year
+            if (
+                $selectedSemester > $student->semester ||
+                ($selectedSemester == $student->semester && $semesterMatchesYear)
+            ) {
+                DB::rollBack();
+                flashMessage('Semester yang dipilih tidak valid untuk KRS tertinggal', 'error');
+                return to_route('students.study-plans.index');
+            }
+
+            // Cek apakah sudah ada KRS untuk semester ini
+            $existingStudyPlan = StudyPlan::query()
+                ->where('student_id', $student->id)
+                ->where('semester', $selectedSemester)
+                ->whereIn('status', [StudyPlanStatus::PENDING, StudyPlanStatus::APPROVED])
+                ->exists();
+
+            if ($existingStudyPlan) {
+                DB::rollBack();
+                flashMessage('Anda sudah mengajukan KRS untuk semester ' . $selectedSemester, 'warning');
+                return to_route('students.study-plans.index');
+            }
+
+            // Create backdated study plan
+            $studyPlan = StudyPlan::create([
+                'student_id' => $student->id,
+                'academic_year_id' => $selectedAcademicYear->id,
+                'semester' => $selectedSemester,
+                'status' => StudyPlanStatus::PENDING,
+            ]);
+
+            // Attach schedules to the study plan
+            $studyPlan->schedules()->attach($request->schedule_id);
+
+            DB::commit();
+
+            flashMessage('Berhasil mengajukan KRS untuk semester ' . $selectedSemester, 'success');
+            return to_route('students.study-plans.index');
+        } catch (Throwable $e) {
+            DB::rollBack();
+            flashMessage(MessageType::ERROR->message(error: $e->getMessage()), 'error');
+            return to_route('students.study-plans.index');
+        }
     }
 
     /**

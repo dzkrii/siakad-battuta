@@ -22,6 +22,10 @@ Route::prefix('students')->middleware(['auth', 'role:Student'])->group(function 
     // Route untuk pemilihan kelas sebelum mebuat krs baru
     Route::get('study-plans/select-classroom', 'selectClassroom')->name('students.study-plans.select-classroom');
     Route::post('study-plans/select-classroom', 'storeClassroom')->name('students.study-plans.store-classroom');
+
+    // Routes untuk KRS tertinggal (backdated KRS)
+    Route::post('study-plans/create-backdated', 'createBackdated')->name('students.study-plans.create-backdated');
+    Route::post('study-plans/store-backdated', 'storeBackdated')->name('students.study-plans.store-backdated');
   });
 
   Route::get('schedules', ScheduleStudentController::class)->name('students.schedules.index');
