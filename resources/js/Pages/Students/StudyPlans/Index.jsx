@@ -57,29 +57,30 @@ export default function Index() {
                                 Ajukan KRS
                             </Link>
                         </Button>
-                    ) : // : block_reason === 'KRS Sudah Diajukan' ? (
-                    //     <Button variant="outline" size="xl" className="w-full lg:w-auto" asChild disabled>
-                    //         <span>
-                    //             <IconPlus className="mr-1 size-4" />
-                    //             KRS Sudah Diajukan
-                    //         </span>
-                    //     </Button>
-                    // ) : block_reason === 'Semester Tidak Sesuai' ? (
-                    //     <Button variant="red" size="xl" className="w-full lg:w-auto" asChild disabled>
-                    //         <span>
-                    //             <IconAlertCircle className="mr-1 size-4" />
-                    //             Hubungi Admin
-                    //         </span>
-                    //     </Button>
-                    // )
-                    student?.classroom_id ? (
-                        <Button variant="outline" size="xl" className="w-full lg:w-auto" asChild disabled>
-                            <span>
-                                <IconPlus className="mr-1 size-4" />
-                                KRS Sudah Diajukan
-                            </span>
-                        </Button>
                     ) : (
+                        // : block_reason === 'KRS Sudah Diajukan' ? (
+                        //     <Button variant="outline" size="xl" className="w-full lg:w-auto" asChild disabled>
+                        //         <span>
+                        //             <IconPlus className="mr-1 size-4" />
+                        //             KRS Sudah Diajukan
+                        //         </span>
+                        //     </Button>
+                        // ) : block_reason === 'Semester Tidak Sesuai' ? (
+                        //     <Button variant="red" size="xl" className="w-full lg:w-auto" asChild disabled>
+                        //         <span>
+                        //             <IconAlertCircle className="mr-1 size-4" />
+                        //             Hubungi Admin
+                        //         </span>
+                        //     </Button>
+                        // )
+                        // student?.classroom_id ? (
+                        //     <Button variant="outline" size="xl" className="w-full lg:w-auto" asChild disabled>
+                        //         <span>
+                        //             <IconPlus className="mr-1 size-4" />
+                        //             KRS Sudah Diajukan
+                        //         </span>
+                        //     </Button>
+                        // ) :
                         <Button variant="blue" size="xl" className="w-full lg:w-auto" asChild>
                             <Link href={route('students.study-plans.select-classroom')}>
                                 <IconSchool className="mr-1 size-4" />
