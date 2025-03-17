@@ -49,47 +49,12 @@ export default function Index() {
             <div className="mb-8 flex flex-col items-start justify-between gap-y-4 lg:flex-row lg:items-center">
                 <HeaderTitle title={page_settings.title} subtitle={page_settings.subtitle} icon={IconBuilding} />
                 <div className="flex w-full flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0 lg:w-auto">
-                    {
-                        can_create_study_plan && (
-                            <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
-                                <Link href={route('students.study-plans.create')}>
-                                    <IconPlus className="mr-1 size-4" />
-                                    Ajukan KRS
-                                </Link>
-                            </Button>
-                        )
-                        // : (
-                        // : block_reason === 'KRS Sudah Diajukan' ? (
-                        //     <Button variant="outline" size="xl" className="w-full lg:w-auto" asChild disabled>
-                        //         <span>
-                        //             <IconPlus className="mr-1 size-4" />
-                        //             KRS Sudah Diajukan
-                        //         </span>
-                        //     </Button>
-                        // ) : block_reason === 'Semester Tidak Sesuai' ? (
-                        //     <Button variant="red" size="xl" className="w-full lg:w-auto" asChild disabled>
-                        //         <span>
-                        //             <IconAlertCircle className="mr-1 size-4" />
-                        //             Hubungi Admin
-                        //         </span>
-                        //     </Button>
-                        // )
-                        // student?.classroom_id ? (
-                        //     <Button variant="outline" size="xl" className="w-full lg:w-auto" asChild disabled>
-                        //         <span>
-                        //             <IconPlus className="mr-1 size-4" />
-                        //             KRS Sudah Diajukan
-                        //         </span>
-                        //     </Button>
-                        // ) :
-                        // <Button variant="blue" size="xl" className="w-full lg:w-auto" asChild>
-                        //     <Link href={route('students.study-plans.select-classroom')}>
-                        //         <IconSchool className="mr-1 size-4" />
-                        //         Pilih Kelas
-                        //     </Link>
-                        // </Button>
-                        // )
-                    }
+                    <Button variant="orange" size="xl" className="w-full lg:w-auto" asChild>
+                        <Link href={route('students.study-plans.create')}>
+                            <IconPlus className="mr-1 size-4" />
+                            Ajukan KRS
+                        </Link>
+                    </Button>
                 </div>
             </div>
             {student && (
