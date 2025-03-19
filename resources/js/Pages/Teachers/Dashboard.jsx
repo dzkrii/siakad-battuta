@@ -1,3 +1,4 @@
+import AnnouncementCard from '@/Components/AnnouncementCard';
 import CardStat from '@/Components/CardStat';
 import HeaderTitle from '@/Components/HeaderTitle';
 import AppLayout from '@/Layouts/AppLayout';
@@ -22,6 +23,11 @@ export default function Dashboard(props) {
                     Selamat datang di Sistem Informasi Akademik Universitas Battuta
                 </p>
             </div>
+
+            {props.announcements && props.announcements.length > 0 && (
+                <AnnouncementCard announcements={props.announcements} />
+            )}
+
             <div className="mb-8 grid gap-4 lg:grid-cols-3">
                 <CardStat
                     data={{

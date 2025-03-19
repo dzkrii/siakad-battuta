@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/Components/ui/avatar';
 import { Link } from '@inertiajs/react';
 import {
     IconArrowsUp,
+    IconBellRinging,
     IconBooks,
     IconBuildingSkyscraper,
     IconCalendar,
@@ -119,6 +120,12 @@ export default function Sidebar({ auth, url }) {
                             active={url.startsWith('/admin/semester-management')}
                             title="Manajemen Semester"
                             icon={IconArrowsUp}
+                        />
+                        <NavLink
+                            url={route('admin.announcements.index')}
+                            active={url.startsWith('/admin/announcements')}
+                            title="Pengumuman"
+                            icon={IconBellRinging}
                         />
 
                         <div className="px-3 py-2 text-xs font-medium text-white">Pembayaran</div>

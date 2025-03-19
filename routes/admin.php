@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AcademicYearController;
 use App\Http\Controllers\Admin\AdminGradesController;
+use App\Http\Controllers\Admin\AnnouncementController;
 use App\Http\Controllers\Admin\ClassroomController;
 use App\Http\Controllers\Admin\ClassroomStudentController;
 use App\Http\Controllers\Admin\CourseController;
@@ -151,6 +152,16 @@ Route::prefix('admin')->middleware(['auth', 'role:Admin'])->group(function () {
         Route::get('semester-management/{semester}', 'showSemester')->name('admin.semester-management.show');
         Route::post('semester-management/increase', 'increaseSemester')->name('admin.semester-management.increase');
         Route::post('semester-management/increase-all/{semester}', 'increaseSemesterAll')->name('admin.semester-management.increase-all');
+    });
+
+    // Route untuk pengumuman
+    Route::controller(AnnouncementController::class)->group(function () {
+        Route::get('announcements', 'index')->name('admin.announcements.index');
+        Route::get('announcements/create', 'create')->name('admin.announcements.create');
+        Route::post('announcements', 'store')->name('admin.announcements.store');
+        Route::get('announcements/{announcement}/edit', 'edit')->name('admin.announcements.edit');
+        Route::put('announcements/{announcement}', 'update')->name('admin.announcements.update');
+        Route::delete('announcements/{announcement}', 'destroy')->name('admin.announcements.destroy');
     });
 
     Route::get('fees', FeeController::class)->name('admin.fees.index');

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Enums\FeeStatus;
 use App\Enums\StudyPlanStatus;
 use App\Http\Controllers\Controller;
+use App\Models\Announcement;
 use App\Models\Fee;
 use App\Models\StudyPlan;
 use Illuminate\Http\Request;
@@ -14,6 +15,13 @@ class DashboardStudentController extends Controller
 {
     public function __invoke(): Response
     {
+        // Fetch active announcements for students
+        $announcements = Announcement::active()
+            ->forStudents()
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get();
+
         return inertia('Students/Dashboard', [
             'page_settings' => [
                 'title' => 'Dashboard',
@@ -34,6 +42,7 @@ class DashboardStudentController extends Controller
                     ->get()
                     ->sum(fn($fee) => $fee->feeGroup->amount),
             ],
+            'announcements' => $announcements,
         ]);
     }
 }

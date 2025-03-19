@@ -1,6 +1,5 @@
-import CardStat from '@/Components/CardStat';
+import AnnouncementCard from '@/Components/AnnouncementCard';
 import StudentLayout from '@/Layouts/StudentLayout';
-import { IconCheck, IconX } from '@tabler/icons-react';
 
 export default function Dashboard(props) {
     return (
@@ -14,7 +13,11 @@ export default function Dashboard(props) {
                 </div>
             </div>
 
-            <div className="mb-8 grid gap-4 lg:grid-cols-2">
+            {props.announcements && props.announcements.length > 0 && (
+                <AnnouncementCard announcements={props.announcements} />
+            )}
+
+            {/* <div className="mb-8 grid gap-4 lg:grid-cols-2">
                 <CardStat
                     data={{
                         title: 'Kartu Rencana Studi Diterima',
@@ -35,7 +38,7 @@ export default function Dashboard(props) {
                 >
                     <div className="text-2xl font-bold">{props.count.study_plans_reject}</div>
                 </CardStat>
-                {/* <CardStat
+                <CardStat
                     data={{
                         title: 'Total Pembayaran',
                         icon: IconCreditCard,
@@ -44,8 +47,8 @@ export default function Dashboard(props) {
                     }}
                 >
                     <div className="text-2xl font-bold">{props.count.total_payments}</div>
-                </CardStat> */}
-            </div>
+                </CardStat>
+            </div> */}
         </div>
     );
 }
