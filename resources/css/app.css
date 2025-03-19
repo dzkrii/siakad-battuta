@@ -98,3 +98,130 @@
         opacity: 1;
     }
 }
+
+/* Custom Quill Editor Styles */
+/* Style for rendered Quill content */
+.ql-content {
+    font-family: inherit;
+}
+
+.ql-content p {
+    margin-bottom: 0.75rem;
+}
+
+.ql-content strong {
+    font-weight: bold;
+}
+
+.ql-content em {
+    font-style: italic;
+}
+
+.ql-content u {
+    text-decoration: underline;
+}
+
+.ql-content s {
+    text-decoration: line-through;
+}
+
+.ql-content h1,
+.ql-content h2,
+.ql-content h3,
+.ql-content h4,
+.ql-content h5,
+.ql-content h6 {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.ql-content h1 {
+    font-size: 1.5rem;
+}
+
+.ql-content h2 {
+    font-size: 1.25rem;
+}
+
+.ql-content h3 {
+    font-size: 1.125rem;
+}
+
+.ql-content ol,
+.ql-content ul {
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+}
+
+.ql-content ol {
+    list-style-type: decimal;
+}
+
+.ql-content ul {
+    list-style-type: disc;
+}
+
+.ql-content a {
+    color: hsl(var(--primary));
+    text-decoration: underline;
+}
+
+.ql-content a:hover {
+    text-decoration: none;
+}
+
+/* Make sure Quill editor has appropriate height */
+.quill {
+    height: auto;
+    min-height: 200px;
+}
+
+.ql-container {
+    min-height: 150px;
+}
+
+/* Fix for Quill toolbar in dark mode */
+.dark .ql-snow.ql-toolbar button svg,
+.dark .ql-snow .ql-toolbar button svg {
+    filter: invert(1);
+}
+
+.dark .ql-snow.ql-toolbar button.ql-active svg,
+.dark .ql-snow .ql-toolbar button.ql-active svg {
+    filter: invert(1);
+}
+
+/* Improve Quill editor appearance in your theme */
+.ql-editor {
+    min-height: 200px;
+    font-family: 'Inter', sans-serif;
+}
+
+.ql-toolbar.ql-snow {
+    border-top-left-radius: var(--radius);
+    border-top-right-radius: var(--radius);
+    border-color: hsl(var(--border));
+}
+
+.ql-container.ql-snow {
+    border-bottom-left-radius: var(--radius);
+    border-bottom-right-radius: var(--radius);
+    border-color: hsl(var(--border));
+}
+
+.dark .ql-toolbar.ql-snow,
+.dark .ql-container.ql-snow {
+    border-color: hsl(var(--border));
+}
+
+.dark .ql-editor {
+    color: hsl(var(--foreground));
+    background-color: hsl(var(--background));
+}
+
+/* Fix placeholder color for dark mode */
+.dark .ql-editor.ql-blank::before {
+    color: hsl(var(--muted-foreground));
+}

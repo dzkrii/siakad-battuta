@@ -8,13 +8,15 @@ import { Input } from '@/Components/ui/input';
 import { Label } from '@/Components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/Components/ui/popover';
 import { Switch } from '@/Components/ui/switch';
-import { Textarea } from '@/Components/ui/textarea';
 import AppLayout from '@/Layouts/AppLayout';
 import { cn, flashMessage } from '@/lib/utils';
 import { Link, useForm } from '@inertiajs/react';
 import { IconArrowLeft, IconBellRinging, IconCalendar, IconCheck } from '@tabler/icons-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
+import { useEffect, useState } from 'react';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css'; // Import Quill styles
 import { toast } from 'sonner';
 
 export default function Edit({ page_settings, announcement }) {
@@ -28,6 +30,13 @@ export default function Edit({ page_settings, announcement }) {
         is_active: announcement.is_active || false,
     });
 
+    // For client-side only rendering of ReactQuill
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
     const handleSubmit = (e) => {
         e.preventDefault();
         put(route('admin.announcements.update', announcement.id), {
@@ -39,6 +48,32 @@ export default function Edit({ page_settings, announcement }) {
             },
         });
     };
+
+    // Configure Quill modules
+    const modules = {
+        toolbar: [
+            [{ header: [1, 2, 3, 4, 5, 6, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
+            [{ list: 'ordered' }, { list: 'bullet' }],
+            [{ color: [] }, { background: [] }],
+            ['link'],
+            ['clean'],
+        ],
+    };
+
+    // Configure Quill formats
+    const formats = [
+        'header',
+        'bold',
+        'italic',
+        'underline',
+        'strike',
+        'list',
+        'bullet',
+        'color',
+        'background',
+        'link',
+    ];
 
     return (
         <div className="flex flex-col gap-y-8">
@@ -73,13 +108,17 @@ export default function Edit({ page_settings, announcement }) {
 
                             <div>
                                 <Label htmlFor="content">Isi Pengumuman</Label>
-                                <Textarea
-                                    id="content"
-                                    value={data.content}
-                                    onChange={(e) => setData('content', e.target.value)}
-                                    className="mt-1 min-h-[200px]"
-                                    placeholder="Tulis isi pengumuman di sini..."
-                                />
+                                {isMounted && (
+                                    <ReactQuill
+                                        theme="snow"
+                                        value={data.content}
+                                        onChange={(content) => setData('content', content)}
+                                        modules={modules}
+                                        formats={formats}
+                                        className="mt-1 min-h-[200px]"
+                                        placeholder="Tulis isi pengumuman di sini..."
+                                    />
+                                )}
                                 {errors.content && <InputError message={errors.content} />}
                             </div>
 

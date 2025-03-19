@@ -2,6 +2,7 @@ import { IconBellRinging, IconChevronDown, IconChevronUp } from '@tabler/icons-r
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { useState } from 'react';
+import 'react-quill/dist/quill.snow.css'; // Import Quill styles for proper rendering
 
 export default function AnnouncementCard({ announcements }) {
     const [expandedId, setExpandedId] = useState(null);
@@ -52,10 +53,13 @@ export default function AnnouncementCard({ announcements }) {
                             </button>
                         </div>
                         {expandedId === announcement.id && (
-                            <div
-                                className="prose-sm prose mt-4 max-w-none"
-                                dangerouslySetInnerHTML={{ __html: announcement.content }}
-                            />
+                            <div className="mt-4">
+                                {/* Use a dedicated class to style the Quill content */}
+                                <div
+                                    className="ql-content prose-sm prose max-w-none"
+                                    dangerouslySetInnerHTML={{ __html: announcement.content }}
+                                />
+                            </div>
                         )}
                     </div>
                 ))}
