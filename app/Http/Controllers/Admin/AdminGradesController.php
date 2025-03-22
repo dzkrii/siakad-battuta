@@ -77,70 +77,118 @@ class AdminGradesController extends Controller
       return redirect()->route('admin.students.grades.select-semester', $student);
     }
 
-    // Get courses for this student in this semester (from study plans)
-    $coursesQuery = Course::query()
-      ->select('courses.*')
+    // DEBUGGING: Untuk melihat query SQL yang dijalankan
+    DB::enableQueryLog();
+
+    // Get courses dari study plans (approved) dan dari study result grades
+    $studyPlanCourseIds = Course::query()
+      ->select('courses.id')
       ->join('schedules', 'courses.id', '=', 'schedules.course_id')
       ->join('study_plan_schedule', 'schedules.id', '=', 'study_plan_schedule.schedule_id')
       ->join('study_plans', 'study_plan_schedule.study_plan_id', '=', 'study_plans.id')
       ->where('study_plans.student_id', $student->id)
       ->where('study_plans.semester', $semester)
-      ->where('courses.semester', $semester);
+      ->where('study_plans.status', 'Approved')
+      ->where('courses.semester', $semester)
+      ->pluck('courses.id')
+      ->toArray();
 
-    // Add courses that have study result grades but might not be in study plans
-    $extraCourseIds = StudyResultGrade::where('study_result_id', $studyResult->id)
+    $gradeCourseIds = StudyResultGrade::where('study_result_id', $studyResult->id)
       ->pluck('course_id')
       ->toArray();
 
-    if (!empty($extraCourseIds)) {
-      $coursesQuery->orWhere(function ($query) use ($extraCourseIds, $semester) {
-        $query->whereIn('courses.id', $extraCourseIds)
-          ->where('courses.semester', $semester);
-      });
-    }
+    // Gabungkan ID course dari kedua sumber
+    $allCourseIds = array_unique(array_merge($studyPlanCourseIds, $gradeCourseIds));
 
-    $courses = $coursesQuery->distinct()->get();
+    // DEBUGGING: Lihat semua course ID yang ditemukan
+    Log::info("Student ID: {$student->id}, Semester: {$semester}");
+    Log::info("StudyPlan Course IDs: " . implode(', ', $studyPlanCourseIds));
+    Log::info("Grade Course IDs: " . implode(', ', $gradeCourseIds));
+    Log::info("All Course IDs: " . implode(', ', $allCourseIds));
+
+    // Dapatkan semua course berdasarkan ID
+    $courses = Course::whereIn('id', $allCourseIds)->get();
+
+    // DEBUGGING: Query log untuk melihat SQL yang dijalankan
+    Log::info(DB::getQueryLog());
+
+    // DEBUGGING: Lihat course yang ditemukan
+    foreach ($courses as $index => $course) {
+      Log::info("Course {$index}: ID={$course->id}, Name={$course->name}, Code={$course->kode_matkul}");
+    }
 
     // For each course, get the existing grades
     $courseGrades = [];
 
     foreach ($courses as $course) {
-      // Get the classroom for this course (using the most recent schedule)
-      $schedule = Schedule::where('course_id', $course->id)
-        ->orderBy('created_at', 'desc')
-        ->first();
+      // PENTING: Tangani kasus jika classroom_id tidak ditemukan
+      try {
+        // Get the classroom for this course (using the most recent schedule)
+        $schedule = Schedule::where('course_id', $course->id)
+          ->orderBy('created_at', 'desc')
+          ->first();
 
-      $classroomId = $schedule ? $schedule->classroom_id : null;
+        $classroomId = $schedule ? $schedule->classroom_id : null;
 
-      // Try to find the grades for this course
-      $grades = [
-        'tugas' => $this->getGrade($student->id, $course->id, $classroomId, 'tugas'),
-        'uts' => $this->getGrade($student->id, $course->id, $classroomId, 'uts'),
-        'uas' => $this->getGrade($student->id, $course->id, $classroomId, 'uas')
-      ];
+        // JIKA TIDAK ADA CLASSROOM, GUNAKAN DEFAULT CLASSROOM ID = 1
+        // Atau gunakan ID classroom lain yang valid di sistem Anda
+        if ($classroomId === null) {
+          Log::warning("Classroom ID not found for course ID: {$course->id}, Name: {$course->name}. Using default classroom.");
+          $classroomId = 1; // Ganti dengan classroom ID default yang valid
+        }
 
-      // Get attendance count
-      $attendanceCount = Attendance::where('student_id', $student->id)
-        ->where('course_id', $course->id)
-        ->where('classroom_id', $classroomId)
-        ->whereNotNull('status')
-        ->where('status', 1)
-        ->count();
+        // Try to find the grades for this course
+        $grades = [
+          'tugas' => $this->getGrade($student->id, $course->id, $classroomId, 'tugas'),
+          'uts' => $this->getGrade($student->id, $course->id, $classroomId, 'uts'),
+          'uas' => $this->getGrade($student->id, $course->id, $classroomId, 'uas')
+        ];
 
-      // Get the study result grade if exists
-      $studyResultGrade = StudyResultGrade::where('study_result_id', $studyResult->id)
-        ->where('course_id', $course->id)
-        ->first();
+        // Get attendance count
+        $attendanceCount = Attendance::where('student_id', $student->id)
+          ->where('course_id', $course->id)
+          ->where('classroom_id', $classroomId)
+          ->whereNotNull('status')
+          ->where('status', 1)
+          ->count();
 
-      $courseGrades[] = [
-        'course' => $course,
-        'classroom_id' => $classroomId,
-        'grades' => $grades,
-        'attendance_count' => $attendanceCount,
-        'final_score' => $studyResultGrade ? $studyResultGrade->grade : null,
-        'letter' => $studyResultGrade ? $studyResultGrade->letter : null
-      ];
+        // Get the study result grade if exists
+        $studyResultGrade = StudyResultGrade::where('study_result_id', $studyResult->id)
+          ->where('course_id', $course->id)
+          ->first();
+
+        $courseGrades[] = [
+          'course' => $course,
+          'classroom_id' => $classroomId,
+          'grades' => $grades,
+          'attendance_count' => $attendanceCount,
+          'final_score' => $studyResultGrade ? $studyResultGrade->grade : null,
+          'letter' => $studyResultGrade ? $studyResultGrade->letter : null
+        ];
+
+        // DEBUGGING: Log setiap course yang berhasil diproses
+        Log::info("Successfully processed course: {$course->name} with classroom ID: {$classroomId}");
+      } catch (\Exception $e) {
+        // TANGANI ERROR: Log error dan tetap tambahkan course ke daftar dengan nilai default
+        Log::error("Error processing course ID: {$course->id}, Name: {$course->name}. Error: {$e->getMessage()}");
+
+        $courseGrades[] = [
+          'course' => $course,
+          'classroom_id' => 1, // Gunakan classroom default
+          'grades' => [
+            'tugas' => 0,
+            'uts' => 0,
+            'uas' => 0
+          ],
+          'attendance_count' => 0,
+          'final_score' => 0,
+          'letter' => 'E'
+        ];
+      }
     }
+
+    // DEBUGGING: Pastikan jumlah course grades sama dengan jumlah courses
+    Log::info("Total courses: " . count($courses) . ", Total course grades: " . count($courseGrades));
 
     return Inertia::render('Admin/Students/Grades/Edit', [
       'page_settings' => [
