@@ -42,7 +42,7 @@ class AttendanceTemplateExport implements FromCollection, WithHeadings, WithMapp
 
     // Add 16 columns for attendance sections (pertemuan)
     for ($i = 1; $i <= 16; $i++) {
-      $headings[] = "Pertemuan $i";
+      $headings[] = "$i";
     }
 
     return $headings;
@@ -67,37 +67,38 @@ class AttendanceTemplateExport implements FromCollection, WithHeadings, WithMapp
   public function styles(Worksheet $sheet)
   {
     // Add title and information at the top
-    $sheet->mergeCells('A1:S1');
-    $sheet->setCellValue('A1', 'TEMPLATE ABSENSI MAHASISWA');
-    $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
-    $sheet->getStyle('A1')->getAlignment()->setHorizontal('center');
+    $sheet->mergeCells('B1:S1');
+    $sheet->setCellValue('B1', 'ABSENSI MAHASISWA');
+    $sheet->getStyle('B1')->getFont()->setBold(true)->setSize(14);
+    $sheet->getStyle('B1')->getAlignment()->setHorizontal('center');
 
     // Add course and classroom information
-    $sheet->setCellValue('A2', 'Program Studi');
-    $sheet->setCellValue('B2', ': ' . $this->classroom->department->name);
+    $sheet->setCellValue('B2', 'Program Studi');
+    $sheet->setCellValue('C2', ': ' . $this->classroom->department->name);
 
-    $sheet->setCellValue('A3', 'Kelas');
-    $sheet->setCellValue('B3', ': ' . $this->classroom->name);
+    $sheet->setCellValue('B3', 'Kelas');
+    $sheet->setCellValue('C3', ': ' . $this->classroom->name);
 
-    $sheet->setCellValue('A4', 'Mata Kuliah');
-    $sheet->setCellValue('B4', ': ' . $this->course->name . ' (' . $this->course->kode_matkul . ')');
+    $sheet->setCellValue('B4', 'Mata Kuliah');
+    $sheet->setCellValue('C4', ': ' . $this->course->name . ' (' . $this->course->kode_matkul . ')');
 
-    $sheet->setCellValue('A5', 'Dosen Pengampu');
+    $sheet->setCellValue('B5', 'Dosen Pengampu');
     // Assuming the teacher's name can be fetched, otherwise hardcode or remove
-    $sheet->setCellValue('B5', ': ' . ($this->course->teacher->user->name ?? 'Dosen Pengampu'));
+    $sheet->setCellValue('C5', ': ' . ($this->course->teacher->user->name ?? 'Dosen Pengampu'));
 
-    $sheet->setCellValue('A6', 'Tahun Akademik');
-    $sheet->setCellValue('B6', ': ' . (activeAcademicYear()->name) . '(' . (activeAcademicYear()->semester->value) . ')');
+    $sheet->setCellValue('B6', 'Tahun Akademik');
+    $sheet->setCellValue('C6', ': ' . (activeAcademicYear()->name) . '(' . (activeAcademicYear()->semester->value) . ')');
 
     // Instructions row
-    $sheet->mergeCells('A7:S7');
-    $sheet->setCellValue('A7', 'Petunjuk: Isi kolom "Pertemuan" dengan angka 1 untuk HADIR atau biarkan kosong untuk TIDAK HADIR');
-    $sheet->getStyle('A7')->getFont()->setBold(true);
-    $sheet->getStyle('A7')->getFont()->getColor()->setARGB('FF0000FF'); // Blue text
+    $sheet->mergeCells('B7:S7');
+    $sheet->setCellValue('B7', 'Petunjuk: Isi kolom "Pertemuan" dengan angka 1 untuk HADIR atau biarkan kosong untuk TIDAK HADIR');
+    $sheet->getStyle('B7')->getFont()->setBold(true);
+    $sheet->getStyle('B7')->getFont()->getColor()->setARGB('FF0000FF'); // Blue text
 
     // Style for headers in row 9
     $headerRange = 'A9:S9';
     $sheet->getStyle($headerRange)->getFont()->setBold(true);
+    $sheet->getStyle($headerRange)->getAlignment()->setHorizontal('center');
     $sheet->getStyle($headerRange)->getFill()
       ->setFillType(Fill::FILL_SOLID)
       ->getStartColor()->setARGB('FFD3D3D3'); // Light gray background
@@ -107,11 +108,15 @@ class AttendanceTemplateExport implements FromCollection, WithHeadings, WithMapp
     $sheet->getStyle($dataRange)->getBorders()->getAllBorders()
       ->setBorderStyle(Border::BORDER_THIN);
 
+    // Center alignment for NIM Column
+    $nimRange = 'B9:B' . (9 + $this->students->count());
+    $sheet->getStyle($nimRange)->getAlignment()->setHorizontal('center');
+
     // Center alignment for all attendance columns
     $attendanceRange = 'D9:S' . (9 + $this->students->count());
     $sheet->getStyle($attendanceRange)->getAlignment()->setHorizontal('center');
 
-    // Hide the ID column
+    // Hide only the ID column (A) after the data rows
     $sheet->getColumnDimension('A')->setVisible(false);
 
     return [

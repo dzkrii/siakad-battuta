@@ -15,6 +15,7 @@ class ScheduleTeacherController extends Controller
     {
         $courses = Course::query()
             ->where('teacher_id', auth()->user()->teacher->id)
+            ->where('academic_year_id', activeAcademicYear()->id)
             ->pluck('id');
 
         $schedules = Schedule::query()
