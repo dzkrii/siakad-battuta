@@ -90,4 +90,31 @@ class StudyPlanOperatorController extends Controller
             return to_route('operators.study-plans.index', $student);
         }
     }
+
+    public function destroy(Student $student, StudyPlan $studyPlan): RedirectResponse
+    {
+        try {
+            DB::beginTransaction();
+
+            // Find and delete related study results
+            StudyResult::where([
+                'student_id' => $studyPlan->student_id,
+                'academic_year_id' => $studyPlan->academic_year_id,
+                'semester' => $studyPlan->semester,
+            ])->delete();
+
+            // Delete the study plan
+            $studyPlan->delete();
+
+            DB::commit();
+
+            flashMessage('Kartu rencana studi dan hasil studi terkait berhasil dihapus');
+            return to_route('operators.study-plans.index', $student);
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            flashMessage(MessageType::ERROR->message(error: $e->getMessage()), 'error');
+            return to_route('operators.study-plans.index', $student);
+        }
+    }
 }

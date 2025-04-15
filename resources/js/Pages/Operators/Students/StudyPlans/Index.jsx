@@ -12,6 +12,7 @@ import AppLayout from '@/Layouts/AppLayout';
 import { IconArrowsDownUp, IconBuilding, IconRefresh } from '@tabler/icons-react';
 import { useState } from 'react';
 import Approve from './Approve';
+import Delete from './Delete';
 import Detail from './Detail';
 
 export default function Index(props) {
@@ -198,6 +199,15 @@ export default function Index(props) {
                                                     name={studyPlan.student.name}
                                                     statuses={props.statuses}
                                                     action={route('operators.study-plans.approve', [
+                                                        props.student,
+                                                        studyPlan,
+                                                    ])}
+                                                />
+
+                                                {/* delete */}
+                                                <Delete
+                                                    name={studyPlan.student.name}
+                                                    action={route('operators.study-plans.destroy', [
                                                         props.student,
                                                         studyPlan,
                                                     ])}

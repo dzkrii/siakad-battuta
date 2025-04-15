@@ -63,6 +63,7 @@ Route::prefix('operators')->middleware(['auth', 'role:Operator'])->group(functio
     Route::controller(StudyPlanOperatorController::class)->group(function () {
         Route::get('students/{student:student_number}/study-plans', 'index')->name('operators.study-plans.index');
         Route::put('students/{student:student_number}/study-plans/{studyPlan}/approve', 'approve')->name('operators.study-plans.approve');
+        Route::delete('students/{student:student_number}/study-plans/{studyPlan}', 'destroy')->name('operators.study-plans.destroy');
     });
 
     Route::get('students/{student:student_number}/fees', FeeOperatorController::class)->name('operators.fees.index');

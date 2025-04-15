@@ -188,7 +188,6 @@ export default function Index(props) {
 
                     <Button
                         variant="green"
-                        disabled={true}
                         onClick={() =>
                             (window.location.href = route('teachers.classrooms.template.attendance', [
                                 props.course.id,
